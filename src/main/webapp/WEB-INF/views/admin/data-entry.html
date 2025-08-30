@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Entry - Online Grocery Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .category-card {
+            border-left: 4px solid #007bff;
+        }
+        .subcategory-card {
+            border-left: 4px solid #28a745;
+            margin-left: 20px;
+        }
+        .product-card {
+            border-left: 4px solid #ffc107;
+            margin-left: 40px;
+        }
+        .btn-action {
+            margin: 2px;
+        }
+        .hierarchy-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-database me-2"></i>Data Entry Management</h2>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Success/Error Messages -->
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span th:text="${success}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="btn-group" role="group">
+                                    <a href="/admin/data-entry/category/new" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Add Category
+                                    </a>
+                                    <a href="/admin/data-entry/subcategory/new" class="btn btn-success">
+                                        <i class="fas fa-plus me-1"></i>Add Subcategory
+                                    </a>
+                                    <a href="/admin/data-entry/product/new" class="btn btn-warning">
+                                        <i class="fas fa-plus me-1"></i>Add Product
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data Hierarchy Display -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h4 class="mb-3">Current Data Structure</h4>
+                                
+                                <div th:if="${#lists.isEmpty(categories)}" class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No categories found. <a href="/admin/data-entry/category/new">Create your first category</a>.
+                                </div>
+
+                                <!-- Categories Loop -->
+                                <div th:each="category : ${categories}" class="hierarchy-item">
+                                    <div class="card category-card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="card-title mb-1">
+                                                        <i class="fas fa-folder text-primary me-2"></i>
+                                                        <span th:text="${category.name}">Category Name</span>
+                                                    </h5>
+                                                    <p class="card-text text-muted mb-2" th:text="${category.description}">Category Description</p>
+                                                    <small class="text-muted">
+                                                        <span th:text="${#lists.size(category.subcategories)}">0</span> subcategories
+                                                    </small>
+                                                </div>
+                                                <div class="btn-group-vertical">
+                                                    <a th:href="@{/admin/data-entry/category/edit/{id}(id=${category.id})}" 
+                                                       class="btn btn-sm btn-outline-primary btn-action">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </a>
+                                                    <a th:href="@{/admin/data-entry/subcategory/new(categoryId=${category.id})}" 
+                                                       class="btn btn-sm btn-outline-success btn-action">
+                                                        <i class="fas fa-plus"></i> Add Sub
+                                                    </a>
+                                                    <form th:action="@{/admin/data-entry/category/delete/{id}(id=${category.id})}" 
+                                                          method="post" style="display: inline;">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger btn-action"
+                                                                onclick="return confirm('Are you sure? This will delete all subcategories and products in this category.')">
+                                                            <i class="fas fa-trash"></i> Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                            <!-- Subcategories -->
+                                            <div th:if="${category.subcategories != null and #lists.size(category.subcategories) > 0}" 
+                                                 class="mt-3">
+                                                <div th:each="subcategory : ${category.subcategories}" class="hierarchy-item">
+                                                    <div class="card subcategory-card">
+                                                        <div class="card-body py-2">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <h6 class="card-title mb-1">
+                                                                        <i class="fas fa-folder-open text-success me-2"></i>
+                                                                        <span th:text="${subcategory.name}">Subcategory Name</span>
+                                                                    </h6>
+                                                                    <p class="card-text text-muted mb-1 small" th:text="${subcategory.description}">Subcategory Description</p>
+                                                                    <small class="text-muted">
+                                                                        <span th:text="${#lists.size(subcategory.products)}">0</span> products
+                                                                    </small>
+                                                                </div>
+                                                                <div class="btn-group">
+                                                                    <a th:href="@{/admin/data-entry/subcategory/edit/{id}(id=${subcategory.id})}" 
+                                                                       class="btn btn-sm btn-outline-primary btn-action">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </a>
+                                                                    <a th:href="@{/admin/data-entry/product/new(subcategoryId=${subcategory.id})}" 
+                                                                       class="btn btn-sm btn-outline-warning btn-action">
+                                                                        <i class="fas fa-plus"></i>
+                                                                    </a>
+                                                                    <form th:action="@{/admin/data-entry/subcategory/delete/{id}(id=${subcategory.id})}" 
+                                                                          method="post" style="display: inline;">
+                                                                        <button type="submit" class="btn btn-sm btn-outline-danger btn-action"
+                                                                                onclick="return confirm('Are you sure? This will delete all products in this subcategory.')">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Products -->
+                                                            <div th:if="${subcategory.products != null and #lists.size(subcategory.products) > 0}" 
+                                                                 class="mt-2">
+                                                                <div th:each="product : ${subcategory.products}" class="hierarchy-item">
+                                                                    <div class="card product-card">
+                                                                        <div class="card-body py-1">
+                                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                                <div>
+                                                                                    <span class="fw-bold">
+                                                                                        <i class="fas fa-box text-warning me-1"></i>
+                                                                                        <span th:text="${product.name}">Product Name</span>
+                                                                                    </span>
+                                                                                    <small class="text-muted ms-2">
+                                                                                        $<span th:text="${product.price}">0.00</span> |
+                                                                                        <span th:text="${product.quantity}">0</span> <span th:text="${product.unit}">units</span> |
+                                                                                        <span th:text="${product.brand}">Brand</span>
+                                                                                    </small>
+                                                                                    <span th:if="${!product.isActive}" class="badge bg-danger ms-2">Inactive</span>
+                                                                                </div>
+                                                                                <div class="btn-group">
+                                                                                    <a th:href="@{/admin/data-entry/product/edit/{id}(id=${product.id})}" 
+                                                                                       class="btn btn-sm btn-outline-primary btn-action">
+                                                                                        <i class="fas fa-edit"></i>
+                                                                                    </a>
+                                                                                    <form th:action="@{/admin/data-entry/product/delete/{id}(id=${product.id})}" 
+                                                                                          method="post" style="display: inline;">
+                                                                                        <button type="submit" class="btn btn-sm btn-outline-danger btn-action"
+                                                                                                onclick="return confirm('Are you sure you want to delete this product?')">
+                                                                                            <i class="fas fa-trash"></i>
+                                                                                        </button>
+                                                                                    </form>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

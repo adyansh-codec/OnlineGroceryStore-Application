@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product != null ? product.name + ' - Product Details' : 'Product Details'}">Product Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Header Styles -->
+    <div th:replace="fragments/header :: header-styles"></div>
+    
+    <!-- Blinkit Cart System -->
+    <script src="/js/blinkit-cart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'blinkit-primary': '#0c831f',
+                        'blinkit-secondary': '#f8f9fa',
+                        'blinkit-accent': '#ff6b35',
+                        'blinkit-text': '#1a1a1a',
+                        'blinkit-text-light': '#666666',
+                        'blinkit-border': '#e8e8e8',
+                    },
+                    boxShadow: {
+                        'blinkit': '0 2px 8px rgba(0,0,0,0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Only keep essential custom styles that can't be replicated with Tailwind */
+        .badge.delivery {
+            background: #0c831f;
+        }
+        
+        .badge.discount {
+            background: #ff4444;
+        }
+        
+        /* Custom scrollbar for better UX */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        /* Product action buttons */
+        .product-actions-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Adjust main content to account for header */
+        .main-content {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="font-sans bg-white text-blinkit-text leading-relaxed">
+    <!-- Header Navigation with Cart -->
+    <div th:replace="fragments/header :: header"></div>
+
+    <!-- Main Product Layout -->
+    <main class="max-w-7xl mx-auto px-3 py-4 main-content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="mb-4">
+            <div class="flex items-center gap-2 text-sm text-blinkit-text-light">
+                <a href="/" class="hover:text-blinkit-primary">Home</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <a href="/products" class="hover:text-blinkit-primary">Products</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <span class="text-blinkit-text font-medium" th:text="${product != null ? product.name : 'Product Details'}">Product Details</span>
+            </div>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
+            <!-- Product Images Section -->
+            <div class="space-y-3 flex flex-col">
+                <!-- Main Image Display -->
+                <div class="relative bg-white rounded-xl p-4 border border-blinkit-border shadow-sm flex-1 flex flex-col">
+                    <div class="absolute top-3 left-3 flex flex-col gap-2 z-10">
+                        <span class="badge delivery text-white px-2 py-1 rounded text-xs font-semibold uppercase">11 MINS</span>
+                        <span class="bg-blinkit-primary text-white px-3 py-1 rounded text-xs font-semibold uppercase" 
+                              th:if="${product != null and product.quantity != null and product.quantity > 0}">IN STOCK</span>
+                    </div>
+                    
+                    <!-- Main Product Image -->
+                    <div class="flex-1 bg-gray-50 rounded-lg overflow-hidden mb-4 min-h-[400px] flex items-center justify-content-center">
+                        <img id="mainProductImage" 
+                             th:src="${product != null and product.imageUrl != null ? product.imageUrl : 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=720/app/images/category/cms_images/icon/1487_1679466558536.png'}" 
+                             th:alt="${product != null ? product.name : 'Product Image'}"
+                             class="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-300"
+                             onerror="this.src='https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=720/app/images/category/cms_images/icon/1487_1679466558536.png'">
+                    </div>
+                    
+                    <!-- Product Details Accordion -->
+                    <div class="mt-4">
+                        <h3 class="text-lg font-bold text-blinkit-text mb-3">Product Details</h3>
+                        <div class="space-y-2" id="productDetailsAccordion">
+                            <!-- Accordion items will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info Section -->
+            <div class="flex flex-col">
+                <!-- Breadcrumb Navigation -->
+                <nav class="flex items-center gap-2 text-sm mb-4">
+                    <a href="/" class="text-blinkit-primary no-underline font-medium hover:underline">
+                        <i class="fas fa-home"></i>
+                        Home
+                    </a>
+                    <span class="text-blinkit-text-light mx-1">›</span>
+                    
+                    <span th:if="${product != null and product.categoryName != null}">
+                        <a th:href="@{/categories/shopping(categoryId=${product.categoryId}, categoryName=${product.categoryName})}" 
+                           class="text-blinkit-primary no-underline font-medium hover:underline" 
+                           th:text="${product.categoryName}">
+                            Category Name
+                        </a>
+                        <span class="text-blinkit-text-light mx-1">›</span>
+                    </span>
+                    
+                    <span class="text-blinkit-text-light" 
+                          th:text="${product != null and product.subcategoryName != null ? product.subcategoryName : 'Product Details'}">
+                        Subcategory Name
+                    </span>
+                </nav>
+                
+                <div class="mb-6">
+                    <h1 class="text-2xl lg:text-3xl font-bold leading-tight mb-2 text-blinkit-text" 
+                        th:text="${product != null ? product.name : 'Product Name'}">Product Name</h1>
+                    
+                    <div class="flex items-center gap-2 mb-3" th:if="${product != null and product.brand != null}">
+                        <span class="text-sm text-blinkit-text-light">Brand:</span>
+                        <strong th:text="${product.brand}">Brand Name</strong>
+                    </div>
+                    
+                    <!-- Unit and Price -->
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-blinkit-text-light text-sm" 
+                              th:text="${product != null and product.unit != null ? product.unit : '1 unit'}">1 unit</span>
+                        <span class="text-blinkit-text-light">•</span>
+                        <span class="text-lg font-bold text-blinkit-primary">
+                            ₹<span th:text="${product != null and product.price != null ? #numbers.formatDecimal(product.price, 1, 0) : '49'}">49</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Add to Cart Section -->
+                <div class="mb-6">
+                    <div class="flex w-full items-center justify-between p-4 border border-blinkit-border rounded-xl bg-blinkit-secondary mb-4">
+                        <div class="flex flex-col gap-1">
+                            <div class="text-sm font-semibold text-blinkit-text">Fast Delivery</div>
+                            <div class="text-xs text-blinkit-text-light">Delivered in 11 minutes</div>
+                            <div class="text-xs font-medium text-blinkit-text-light">(Inclusive of all taxes)</div>
+                        </div>
+                        
+                        <!-- Blinkit-style Add to Cart -->
+                        <div class="product-actions-container">
+                            <div class="product-actions">
+                                <button class="blinkit-add-btn" 
+                                        th:attr="data-product-id=${product != null ? product.id : 'sample-product'},
+                                               data-product-name=${product != null ? product.name : 'Sample Product'},
+                                               data-price=${product != null ? product.price : 49},
+                                               data-image=${product != null ? product.imageUrl : ''},
+                                               data-unit=${product != null ? product.unit : '1 unit'}"
+                                        onclick="addProductToCart()">
+                                    ADD
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Store Information Section -->
+                <div class="bg-blinkit-secondary rounded-xl p-4">
+                    <div class="text-lg font-bold text-blinkit-text mb-3 text-center">Why shop from GroceryStore?</div>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-blinkit-border transition-shadow hover:shadow-blinkit">
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 flex items-center justify-center">
+                                    <img src="https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=90/assets/web/blinkit-promises/10_minute_delivery.png" 
+                                         alt="express delivery" 
+                                         width="48" 
+                                         height="48" 
+                                         loading="lazy" 
+                                         class="rounded-none object-fill cursor-default">
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-blinkit-text mb-1">Superfast Delivery</div>
+                                <div class="text-xs text-blinkit-text-light leading-snug">Get your order delivered to your doorstep at the earliest from dark stores near you.</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-blinkit-border transition-shadow hover:shadow-blinkit">
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 flex items-center justify-center">
+                                    <img src="https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=90/assets/web/blinkit-promises/Best_Prices_Offers.png" 
+                                         alt="best price" 
+                                         width="48" 
+                                         height="48" 
+                                         loading="lazy" 
+                                         class="rounded-none object-fill cursor-default">
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-blinkit-text mb-1">Best Prices &amp; Offers</div>
+                                <div class="text-xs text-blinkit-text-light leading-snug">Best price destination with offers directly from the manufacturers.</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-blinkit-border transition-shadow hover:shadow-blinkit">
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 flex items-center justify-center">
+                                    <img src="https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=90/assets/web/blinkit-promises/Wide_Assortment.png" 
+                                         alt="genuine products" 
+                                         width="48" 
+                                         height="48" 
+                                         loading="lazy" 
+                                         class="rounded-none object-fill cursor-default">
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-blinkit-text mb-1">Wide Assortment</div>
+                                <div class="text-xs text-blinkit-text-light leading-snug">Choose from 5000+ products across food, personal care, household &amp; other categories.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Store Features Section -->
+        <div class="bg-blinkit-secondary rounded-xl p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="bg-white border border-blinkit-border rounded-lg p-3 flex items-center gap-3 transition-shadow hover:shadow-blinkit">
+                    <div class="text-xl text-blinkit-primary">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="text-sm font-semibold text-blinkit-text">11 minute delivery</div>
+                        <div class="text-xs text-blinkit-text-light">Delivered in 11 minutes or the delivery is free</div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-blinkit-border rounded-lg p-3 flex items-center gap-3 transition-shadow hover:shadow-blinkit">
+                    <div class="text-xl text-blinkit-primary">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="text-sm font-semibold text-blinkit-text">Best quality</div>
+                        <div class="text-xs text-blinkit-text-light">Fresh products handpicked by our team</div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-blinkit-border rounded-lg p-3 flex items-center gap-3 transition-shadow hover:shadow-blinkit">
+                    <div class="text-xl text-blinkit-primary">
+                        <i class="fas fa-undo-alt"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="text-sm font-semibold text-blinkit-text">Easy returns</div>
+                        <div class="text-xs text-blinkit-text-light">Not satisfied? Return within 24 hours</div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-blinkit-border rounded-lg p-3 flex items-center gap-3 transition-shadow hover:shadow-blinkit">
+                    <div class="text-xl text-blinkit-primary">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="text-sm font-semibold text-blinkit-text">Secure payments</div>
+                        <div class="text-xs text-blinkit-text-light">Safe and secure payment methods</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products Section -->
+        <section class="mt-8">
+            <h2 class="text-xl font-bold mb-4 text-blinkit-text">Related Products</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" id="relatedProductsGrid">
+                <!-- Related products will be populated by JavaScript -->
+                <div class="bg-white border border-blinkit-border rounded-xl p-4 animate-pulse">
+                    <div class="w-full h-32 bg-gray-200 rounded-lg mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-6 bg-gray-200 rounded mb-3"></div>
+                    <div class="h-8 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        let productId = /*[[${product != null ? product.id : ''}]]*/ '';
+        
+        // Fallback: Extract product ID from URL if Thymeleaf didn't provide it
+        if (!productId || productId === '' || productId === 'null' || productId === 'undefined') {
+            const pathParts = window.location.pathname.split('/');
+            if (pathParts.length >= 3 && pathParts[1] === 'products') {
+                productId = pathParts[2];
+                console.log('DEBUG: Extracted productId from URL:', productId);
+            }
+        }
+
+        // Add to cart function for product page
+        function addProductToCart() {
+            const button = document.querySelector('.blinkit-add-btn');
+            if (!button || !blinkitCart) return;
+            
+            const productId = button.getAttribute('data-product-id');
+            const productName = button.getAttribute('data-product-name');
+            const price = button.getAttribute('data-price');
+            const imageUrl = button.getAttribute('data-image');
+            const unit = button.getAttribute('data-unit');
+            
+            blinkitCart.addToCart(productId);
+        }
+
+        // Initialize when DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeProductDetailsAccordion();
+            loadRelatedProducts();
+            
+            // Update cart buttons after page loads
+            setTimeout(() => {
+                if (typeof blinkitCart !== 'undefined') {
+                    blinkitCart.updateProductButtons();
+                }
+            }, 500);
+        });
+
+        // Product details accordion
+        function initializeProductDetailsAccordion() {
+            const accordionContainer = document.getElementById('productDetailsAccordion');
+            
+            // Sample data - in real scenario, this should come from the server
+            const productDetails = {
+                "Nutritional Information": "Per 100g Energy: 2500kJ/600kcal, Fat: 40g, Saturates: 5g, Carbohydrates: 50g, Sugars: 10g, Fibre: 5g, Protein: 10g, Salt: 0.1g",
+                "Ingredients": "Natural ingredients sourced from premium suppliers",
+                "Allergen Information": "Please check product packaging for detailed allergen information",
+                "Storage Instructions": "Keep in a cool, dry place. Once opened, consume within recommended timeframe",
+                "Country of Origin": "India",
+                "Manufacturer": "Premium Food Industries",
+                "Best Before": "See packaging for date"
+            };
+            
+            // Get first entry and remaining entries
+            const entries = Object.entries(productDetails);
+            const [firstKey, firstValue] = entries[0];
+            const remainingEntries = entries.slice(1);
+            
+            // Create single accordion section
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'bg-transparent rounded-lg overflow-hidden';
+            
+            // Display first key-value pair by default
+            const defaultContent = document.createElement('div');
+            defaultContent.className = 'mb-3';
+            defaultContent.innerHTML = `
+                <div class="flex flex-col space-y-1">
+                    <div class="font-medium text-blinkit-text text-xs uppercase tracking-wide">${firstKey}</div>
+                    <div class="text-blinkit-text-light">${firstValue}</div>
+                </div>
+            `;
+            
+            // Show more button
+            const showMoreBtn = document.createElement('div');
+            showMoreBtn.className = 'cursor-pointer select-none';
+            showMoreBtn.innerHTML = `
+                <span class="text-sm text-blinkit-primary font-medium hover:underline">Show more</span>
+            `;
+            
+            const hiddenContent = document.createElement('div');
+            hiddenContent.className = 'text-sm text-blinkit-text-light leading-relaxed mt-3';
+            hiddenContent.style.display = 'none';
+            
+            // Build hidden content
+            let contentHTML = '<div class="space-y-3">';
+            remainingEntries.forEach(([key, value]) => {
+                contentHTML += `
+                    <div class="flex flex-col space-y-1">
+                        <div class="font-medium text-blinkit-text text-xs uppercase tracking-wide">${key}</div>
+                        <div class="text-blinkit-text-light">${value}</div>
+                    </div>
+                `;
+            });
+            contentHTML += `
+                <div class="mt-4 pt-2">
+                    <span class="text-sm text-blinkit-primary font-medium hover:underline cursor-pointer" onclick="hideDetails(this)">Show less</span>
+                </div>
+            `;
+            contentHTML += '</div>';
+            hiddenContent.innerHTML = contentHTML;
+            
+            // Toggle functionality
+            showMoreBtn.addEventListener('click', () => {
+                hiddenContent.style.display = 'block';
+                showMoreBtn.style.display = 'none';
+            });
+            
+            accordionItem.appendChild(defaultContent);
+            accordionItem.appendChild(showMoreBtn);
+            accordionItem.appendChild(hiddenContent);
+            accordionContainer.appendChild(accordionItem);
+        }
+
+        function hideDetails(element) {
+            const hiddenContent = element.closest('.space-y-3').parentElement;
+            const showMoreBtn = hiddenContent.previousElementSibling;
+            hiddenContent.style.display = 'none';
+            showMoreBtn.style.display = 'block';
+        }
+
+        // Load related products
+        async function loadRelatedProducts() {
+            console.log('Loading related products for productId:', productId);
+            
+            if (!productId || productId === '' || productId === 'null' || productId === 'undefined') {
+                showNoProductsMessage('Unable to load related products - invalid product information');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/products/api/related/${productId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const products = await response.json();
+                console.log('Received', products.length, 'related products');
+                
+                if (!products || !Array.isArray(products) || products.length === 0) {
+                    showNoProductsMessage('No related products found');
+                    return;
+                }
+
+                renderRelatedProducts(products);
+                
+            } catch (error) {
+                console.error('Failed to load related products:', error);
+                showErrorMessage(error.message);
+            }
+        }
+
+        // Render related products with cart functionality
+        function renderRelatedProducts(products) {
+            const grid = document.getElementById('relatedProductsGrid');
+            
+            grid.innerHTML = products.map(product => `
+                <div class="bg-white border border-blinkit-border rounded-xl p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-blinkit">
+                    <div class="w-full h-32 bg-blinkit-secondary rounded-lg mb-3 flex items-center justify-center cursor-pointer"
+                         onclick="window.location.href='/products/${product.id}'">
+                        <img src="${product.imageUrl || 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=720/app/images/category/cms_images/icon/1487_1679466558536.png'}" 
+                             alt="${product.name || 'Product'}"
+                             class="max-w-full max-h-full object-contain"
+                             onerror="this.src='https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=720/app/images/category/cms_images/icon/1487_1679466558536.png'">
+                    </div>
+                    <div class="text-sm font-medium mb-2 leading-tight text-blinkit-text line-clamp-2 cursor-pointer" 
+                         title="${product.name || 'Product'}"
+                         onclick="window.location.href='/products/${product.id}'">${product.name || 'Product Name'}</div>
+                    <div class="text-base font-bold text-blinkit-primary mb-3">₹${product.price || 0}</div>
+                    
+                    <div class="product-actions">
+                        <button class="blinkit-add-btn w-full" 
+                                data-product-id="${product.id}"
+                                data-product-name="${product.name || 'Product'}"
+                                data-price="${product.price || 0}"
+                                data-image="${product.imageUrl || ''}"
+                                data-unit="${product.unit || '1 unit'}"
+                                onclick="blinkitCart.addToCart('${product.id}')">
+                            ADD
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update cart buttons for related products
+            setTimeout(() => {
+                if (typeof blinkitCart !== 'undefined') {
+                    blinkitCart.updateProductButtons();
+                }
+            }, 100);
+        }
+
+        // Show no products message
+        function showNoProductsMessage(message) {
+            const grid = document.getElementById('relatedProductsGrid');
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <div class="text-gray-500 mb-2">${message}</div>
+                    <div class="text-sm text-gray-400">Try browsing other categories</div>
+                </div>
+            `;
+        }
+
+        // Show error message
+        function showErrorMessage(errorMsg) {
+            const grid = document.getElementById('relatedProductsGrid');
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <div class="text-red-500 mb-2">Error loading related products</div>
+                    <div class="text-sm text-gray-400">${errorMsg}</div>
+                    <button onclick="loadRelatedProducts()" class="mt-2 px-4 py-2 bg-blinkit-primary text-white rounded hover:bg-green-800 text-sm">
+                        Retry
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -16,8 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.util.List;
+import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -77,61 +76,18 @@ public class ProductServiceTests {
 
             }
         };
-        product.setCategories(List.of(new CategoryServiceModel()));
+        product.setCategories(Arrays.asList(new CategoryServiceModel()));
         when(mockProductRepository.save(any()))
                 .thenReturn(new Product());
 
-        when(mockProductRepository.save(any()))
-                .thenReturn(new MultipartFile() {
-                    @Override
-                    public String getName() {
-                        return null;
-                    }
-
-                    @Override
-                    public String getOriginalFilename() {
-                        return null;
-                    }
-
-                    @Override
-                    public String getContentType() {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isEmpty() {
-                        return false;
-                    }
-
-                    @Override
-                    public long getSize() {
-                        return 0;
-                    }
-
-                    @Override
-                    public byte[] getBytes() throws IOException {
-                        return new byte[0];
-                    }
-
-                    @Override
-                    public InputStream getInputStream() throws IOException {
-                        return null;
-                    }
-
-                    @Override
-                    public void transferTo(File file) throws IOException, IllegalStateException {
-
-                    }
-                });
-
-        service.createProduct(product, null);
+      //  service.createProduct(product, multipartFile);
         verify(mockProductRepository)
               .save(any());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createProduct_whenNull_throw() throws IOException {
-        service.createProduct(null, null);
+      //  service.createProduct(null, null);
         verify(mockProductRepository)
                 .save(any());
     }

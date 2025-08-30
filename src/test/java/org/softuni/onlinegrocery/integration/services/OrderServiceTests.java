@@ -3,7 +3,6 @@ package org.softuni.onlinegrocery.integration.services;//package org.softuni.pro
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.softuni.onlinegrocery.domain.entities.Order;
 import org.softuni.onlinegrocery.domain.entities.OrderProduct;
 import org.softuni.onlinegrocery.domain.entities.Product;
@@ -88,7 +87,7 @@ public class OrderServiceTests {
 
         orders.add(order);
 
-        var result = service.findAllOrders();
+        List<OrderServiceModel> result = service.findAllOrders();
         OrderServiceModel orderResult = result.get(0);
 
         assertEquals(1, result.size());
@@ -101,7 +100,7 @@ public class OrderServiceTests {
     @Test
     public void findAllOrders_whenNoOrders_returnEmptyOrders() {
         orders.clear();
-        var result = service.findAllOrders();
+        List<OrderServiceModel> result = service.findAllOrders();
         assertTrue(result.isEmpty());
     }
 

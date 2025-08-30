@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Product Entry</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/home.css"/>
+    
+      
+    <style>
+        /* Modern Category Navigation inspired by Blinkit */
+        .category-menu-bar {
+            background: #ffffff;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            margin-bottom: 20px;
+            padding: 0;
+        }
+        
+        .category-menu-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .category-menu {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: nowrap;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            min-height: 60px;
+        }
+        
+        .category-menu::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .category-menu-item {
+            position: relative;
+            margin: 0;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .category-menu-item:hover {
+            z-index: 1002;
+        }
+        
+        .category-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 18px 16px;
+            color: #212121;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            position: relative;
+            border-radius: 6px;
+        }
+        
+        .category-menu-link:hover {
+            color: #333;
+            text-decoration: none;
+            background: #f8f9fa;
+        }
+        
+        .category-menu-item.active .category-menu-link {
+            color: #333;
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        /* Modern Mega Dropdown inspired by Blinkit */
+        .mega-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #f0f0f0;
+            border-top: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            z-index: 9999;
+            
+            /* Start hidden */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            
+            /* Simplified mega dropdown styling */
+            min-height: 200px;
+            max-height: 350px;
+            overflow: hidden;
+        }
+        
+        /* Show dropdown on hover */
+        .category-menu-item:hover > .mega-dropdown {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+            pointer-events: auto !important;
+        }
+        
+        .mega-dropdown:hover {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+            pointer-events: auto !important;
+        }
+        
+        .mega-dropdown-content {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 25px 30px;
+            gap: 30px;
+            flex-wrap: wrap;
+            overflow: hidden;
+        }
+        
+        .dropdown-section {
+            flex: 1 1 auto;
+            padding: 0 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 250px;
+            max-width: 400px;
+        }
+        
+        .dropdown-section:last-child {
+            border-right: none;
+        }
+        
+        .subcategory-grid {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 15px;
+            flex-wrap: wrap;
+            width: 100%;
+            padding-top: 15px;
+        }
+        
+        .subcategory-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 180px;
+            flex: 1;
+        }
+        
+        .subcategory-group-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #878787;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        
+        .subcategory-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .subcategory-item {
+            margin-bottom: 4px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .subcategory-link {
+            display: block;
+            padding: 8px 15px;
+            color: #212121;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 400;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 140px;
+        }
+        
+        .subcategory-link:hover {
+            background: #f8f9fa;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .subcategory-product-count {
+            background: #e8f5e8;
+            color: #388e3c;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        /* Featured Products Section in Dropdown */
+        .featured-products {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .featured-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 12px;
+        }
+        
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        
+        .featured-item {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .featured-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .featured-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .featured-item-name {
+            font-size: 12px;
+            color: #212121;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .featured-item-price {
+            font-size: 11px;
+            color: #388e3c;
+            font-weight: 600;
+        }
+        
+        /* Blinkit-style Category Grid Section */
+        .categories-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background: #ffffff;
+        }
+        
+        .categories-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #212121;
+            margin-bottom: 25px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .categories-title i {
+            color: #0066cc;
+            font-size: 24px;
+        }
+        
+        /* Blinkit Category Grid - MultiImage__Grid inspired */
+        .blinkit-category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+            padding: 0;
+            max-width: 100%;
+        }
+        
+        .blinkit-category-card {
+            background: #ffffff;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .blinkit-category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            border-color: #0066cc;
+        }
+        
+        .blinkit-category-card:hover .category-card-image {
+            transform: scale(1.1);
+        }
+        
+        .category-card-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-bottom: 12px;
+            transition: transform 0.3s ease;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+        }
+        
+        .category-card-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212121;
+            line-height: 1.3;
+            margin: 0;
+            text-align: center;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .category-card-count {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+            font-weight: 400;
+        }
+        
+        .category-grid-loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .category-grid-loading i {
+            color: #0066cc;
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        /* Responsive adjustments for category grid */
+        @media (max-width: 1200px) {
+            .blinkit-category-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 14px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .categories-section {
+                padding: 20px 15px;
+            }
+            
+            .categories-title {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            
+            .blinkit-category-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 12px;
+            }
+            
+            .blinkit-category-card {
+                padding: 12px 8px;
+                min-height: 120px;
+            }
+            
+            .category-card-image {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 8px;
+            }
+            
+            .category-card-name {
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .blinkit-category-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .blinkit-category-card {
+                padding: 10px 6px;
+                min-height: 100px;
+            }
+            
+            .category-card-image {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 6px;
+            }
+            
+            .category-card-name {
+                font-size: 12px;
+            }
+        }
+
+        /* Product Grid Styles - Enhanced for Flipkart look */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .product-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .product-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            border-color: #c0c0c0;
+            transform: translateY(-2px);
+        }
+        
+        .product-image {
+            height: 200px;
+            overflow: hidden;
+            background: #f8f9fa;
+            position: relative;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover .product-image img {
+            transform: scale(1.02);
+        }
+        
+        .product-info {
+            padding: 16px;
+        }
+        
+        .product-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #212121;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .product-description {
+            font-size: 13px;
+            color: #878787;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .product-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 8px;
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .rating-badge {
+            background: #388e3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .rating-count {
+            color: #878787;
+            font-size: 12px;
+        }
+        
+        
+        /* Product card quantity controls when item is in cart */
+        .product-quantity-controls {
+            display: none;
+            width: 100%;
+            align-items: center;
+            background: #0c831f;
+            border-radius: 8px;
+            padding: 4px;
+            gap: 0;
+        }
+        
+        .product-quantity-controls.show {
+            display: flex;
+        }
+        
+        .product-qty-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: all 0.2s ease;
+            flex: 0 0 auto;
+        }
+        
+        .product-qty-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        .product-qty-value {
+            flex: 1;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 4px;
+        }
+        
+        /* Loading Animation */
+        .loading-menu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #878787;
+            font-size: 14px;
+        }
+        
+        .loading-menu i {
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            color: #2874f0;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .mega-dropdown-content {
+                padding: 20px 25px;
+            }
+            
+            .dropdown-section {
+                padding: 0 12px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .category-menu-container {
+                padding: 0 10px;
+            }
+            
+            .category-menu-link {
+                padding: 15px 12px;
+                font-size: 13px;
+            }
+            
+            .mega-dropdown-content {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .dropdown-section {
+                border-right: none;
+                border-bottom: 1px solid #f0f0f0;
+                padding: 0 0 15px 0;
+                margin-bottom: 15px;
+            }
+            
+            .dropdown-section:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+            }
+            
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Category Navigation Bar -->
+    <div class="category-menu-bar">
+        <div class="category-menu-container">
+            <ul class="category-menu" id="categoryMenu">
+                <li class="loading-menu">
+                    <i class="fas fa-spinner"></i> Loading categories...
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Include Global Cart Container -->
+   
+    
+    <!-- Products Grid -->
+    <div class="container-fluid">
+        <div th:if="${products != null and !products.empty}" class="product-grid">
+            <div th:each="product : ${products}" class="product-card" 
+                 onclick="viewProductDetails(this.dataset.productId)"
+                 th:data-product-id="${product.id}"
+                 th:data-product-name="${product.name}"
+                 th:data-product-price="${product.price}">
+                <div class="product-image">
+                    <img src="https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=360/app/images/category/cms_images/icon/1487_1679466558536.png" 
+                         th:alt="${product.name}"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#f8f9fa;color:#6c757d;font-weight:600;\'>' + this.alt + '</div>'">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name" th:text="${product.name}">Product Name</h3>
+                    <p class="product-description" th:text="${product.description}">Product description</p>
+                    <div class="product-price" th:text="'₹' + ${product.price}">₹0.00</div>
+                    <div class="product-details">
+                        <span th:if="${product.brand}" th:text="'Brand: ' + ${product.brand}"></span>
+                        <span th:if="${product.unit}" th:text="' | Unit: ' + ${product.unit}"></span>
+                        <span th:if="${product.quantity}" th:text="' | Stock: ' + ${product.quantity}"></span>
+                    </div>
+                    <button class="add-to-cart-btn" 
+                            th:data-product-id="${product.id}" 
+                            onclick="event.stopPropagation(); addToGlobalCart(this.dataset.productId, this.closest('.product-card').dataset.productName, this.closest('.product-card').dataset.productPrice)">
+                        ADD
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- No Products Message -->
+        <div th:if="${products == null or products.empty}" class="no-products">
+            <i class="fas fa-store-slash"></i>
+            <h3>No Products Available</h3>
+            <p th:if="${subcategoryName}" th:text="'Sorry, no products are currently available in ' + ${subcategoryName} + ' category.'">No products found</p>
+            <p th:unless="${subcategoryName}">No products are currently available in this category.</p>
+            <a href="/home" class="btn btn-success btn-lg mt-4">
+                <i class="fas fa-home"></i> Explore Other Categories
+            </a>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">
+                        <i class="fas fa-check-circle"></i> Success!
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-shopping-cart text-success" style="font-size: 60px;"></i>
+                    <h4 class="mt-3">Product Added Successfully!</h4>
+                    <p>The product has been added to your shopping cart.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-shopping-basket"></i> Continue Shopping
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="toggleGlobalCartModal()">
+                        <i class="fas fa-shopping-cart"></i> View Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Include Global Cart Scripts -->
+    <th:block th:include="fragments/global-cart :: cart-scripts"></th:block>
+    
+    <script>
+        // Debug function to test if JavaScript is working - make it global
+        window.testJavaScript = function() {
+            console.log('JavaScript is working perfectly on Entry page!');
+            alert('🎉 JavaScript is working perfectly on Entry page!');
+        };
+        
+        // Debug function to check API data
+        window.checkApiData = function() {
+            console.log('=== API DATA CHECK ===');
+            console.log('Global allCategories:', allCategories);
+            console.log('Categories count:', allCategories.length);
+            
+            if (allCategories.length > 0) {
+                allCategories.forEach((category, index) => {
+                    console.log('Category ' + (index + 1) + ':', {
+                        name: category.name,
+                        id: category.id,
+                        subcategories: category.subcategories,
+                        subcategoryCount: category.subcategories ? category.subcategories.length : 'undefined'
+                    });
+                });
+            } else {
+                console.log('❌ No categories in global variable');
+            }
+            console.log('=== API DATA CHECK END ===');
+        };
+        
+        // Function to show all dropdowns for testing
+        window.showAllDropdowns = function() {
+            console.log('=== FORCING ALL MEGA DROPDOWNS VISIBLE ===');
+            const menuContainer = document.querySelector('.category-menu-container');
+            if (menuContainer) {
+                menuContainer.classList.toggle('show-all-dropdowns');
+                console.log('Toggled show-all-dropdowns class');
+            }
+            
+            // BRUTE FORCE - make mega dropdowns visible with every possible method
+            const allDropdowns = document.querySelectorAll('.mega-dropdown');
+            allDropdowns.forEach((dropdown, index) => {
+                // Method 1: CSS classes
+                dropdown.classList.add('force-visible');
+                
+                // Method 2: Inline styles with modern positioning
+                dropdown.style.display = 'block';
+                dropdown.style.opacity = '1';
+                dropdown.style.visibility = 'visible';
+                dropdown.style.transform = 'translateY(0)';
+                dropdown.style.pointerEvents = 'auto';
+                dropdown.style.background = '#e6ffe6';
+                dropdown.style.border = '2px solid #00cc00';
+                dropdown.style.position = 'absolute';
+                dropdown.style.top = '100%';
+                dropdown.style.left = '0';
+                dropdown.style.right = '0';
+                dropdown.style.zIndex = '9999';
+                dropdown.style.minHeight = '400px';
+                dropdown.style.maxHeight = '500px';
+                dropdown.style.borderRadius = '0';
+                dropdown.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.12)';
+                
+                // Method 3: Force parent to trigger CSS hover
+                const parent = dropdown.closest('.category-menu-item');
+                if (parent) {
+                    parent.classList.add('force-hover');
+                }
+                
+                console.log('Forced mega dropdown ' + (index + 1) + ' visible with ALL methods');
+                
+                // Test if it's actually visible
+                const computedStyle = window.getComputedStyle(dropdown);
+                console.log('Mega dropdown ' + (index + 1) + ' computed styles:', {
+                    display: computedStyle.display,
+                    opacity: computedStyle.opacity,
+                    visibility: computedStyle.visibility,
+                    transform: computedStyle.transform,
+                    position: computedStyle.position,
+                    top: computedStyle.top,
+                    left: computedStyle.left,
+                    right: computedStyle.right,
+                    zIndex: computedStyle.zIndex,
+                    minHeight: computedStyle.minHeight
+                });
+            });
+            
+            console.log('FORCED ' + allDropdowns.length + ' mega dropdowns visible with BRUTE FORCE');
+        };
+        
+        // Debug function to test mega dropdown
+        window.testDropdown = function() {
+            console.log('=== MEGA DROPDOWN TEST START ===');
+            
+            const allCategories = document.querySelectorAll('.category-menu-item');
+            const allDropdowns = document.querySelectorAll('.mega-dropdown');
+            
+            console.log('Found categories:', allCategories.length);
+            console.log('Found mega dropdowns:', allDropdowns.length);
+            
+            if (allCategories.length === 0) {
+                console.log('❌ No category items found!');
+                return;
+            }
+            
+            const firstCategory = allCategories[0];
+            const dropdown = firstCategory.querySelector('.mega-dropdown');
+            
+            console.log('First category element:', firstCategory);
+            console.log('First mega dropdown element:', dropdown);
+            
+            if (dropdown) {
+                const subcategoryItems = dropdown.querySelectorAll('.subcategory-item');
+                const dropdownSections = dropdown.querySelectorAll('.dropdown-section');
+                const featuredItems = dropdown.querySelectorAll('.featured-item');
+                
+                console.log('Subcategory items in mega dropdown:', subcategoryItems.length);
+                console.log('Dropdown sections:', dropdownSections.length);
+                console.log('Featured items:', featuredItems.length);
+                
+                subcategoryItems.forEach((item, index) => {
+                    console.log('  Subcategory ' + (index + 1) + ':', item.textContent.trim());
+                });
+                
+                console.log('Mega dropdown computed style:', window.getComputedStyle(dropdown).display);
+                console.log('Mega dropdown structure:', dropdown.innerHTML.length, 'chars');
+                
+                // Toggle visibility
+                firstCategory.classList.toggle('debug-show');
+                if (dropdown.style.opacity === '1') {
+                    dropdown.style.opacity = '0';
+                    dropdown.style.visibility = 'hidden';
+                    dropdown.style.transform = 'translateY(-10px)';
+                    dropdown.style.background = '';
+                } else {
+                    dropdown.style.opacity = '1';
+                    dropdown.style.visibility = 'visible';
+                    dropdown.style.transform = 'translateY(0)';
+                    dropdown.style.background = '#ffff00';
+                }
+                console.log('Toggled mega dropdown visibility');
+            } else {
+                console.log('❌ No mega dropdown found in first category!');
+                console.log('First category innerHTML:', firstCategory.innerHTML);
+            }
+            
+            console.log('=== MEGA DROPDOWN TEST END ===');
+        };
+        
+        // Global variables
+        let allCategories = [];
+        let currentSubcategoryId = null;
+        
+        // Get subcategory ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        currentSubcategoryId = urlParams.get('subcategoryId');
+        
+        console.log('Entry page loaded with subcategoryId:', currentSubcategoryId);
+        
+        // Load categories with subcategories on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Entry page DOM loaded, starting category load...');
+            
+            // Check if the menu element exists
+            const menuElement = document.getElementById('categoryMenu');
+            if (!menuElement) {
+                console.error('Category menu element not found on entry page!');
+                return;
+            }
+            
+            // Show a test message first
+            menuElement.innerHTML = '<li style="padding: 20px; color: #28a745; font-weight: 600;"><i class="fas fa-cog fa-spin"></i> Entry page ready, loading categories...</li>';
+            
+            // Add a small delay to ensure everything is ready
+            setTimeout(() => {
+                loadCategoriesWithSubcategories();
+            }, 500);
+            
+            // Add entrance animations to product cards
+            animateProductCards();
+        });
+        
+        // Animate product cards on load
+        function animateProductCards() {
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px) scale(0.9)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0) scale(1)';
+                }, index * 150);
+            });
+        }
+        
+        // Load all categories with their subcategories
+        async function loadCategoriesWithSubcategories() {
+            console.log('Starting to load categories on entry page...');
+            
+            // Test server connectivity first
+            try {
+                console.log('Testing server connectivity from entry page...');
+                const testResponse = await fetch(window.location.origin);
+                console.log('Entry page server test response status:', testResponse.status);
+            } catch (error) {
+                console.error('Entry page server connectivity test failed:', error);
+            }
+            
+            const endpoints = [
+                '/api/categories/with-subcategories',
+                window.location.origin + '/api/categories/with-subcategories'
+            ];
+            
+            for (let endpoint of endpoints) {
+                try {
+                    console.log('Entry page trying endpoint:', endpoint);
+                    const response = await fetch(endpoint);
+                    console.log('Entry page response status:', response.status);
+                    console.log('Entry page response ok:', response.ok);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.log('Entry page error response text:', errorText);
+                        throw new Error('HTTP error! status: ' + response.status + ', message: ' + errorText);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Entry page received data:', data);
+                    allCategories = data;
+                    
+                    if (!data || data.length === 0) {
+                        console.log('No categories found on entry page');
+                        document.getElementById('categoryMenu').innerHTML = 
+                            '<li style="padding: 20px; color: #666;">No categories available</li>';
+                        return;
+                    }
+                    
+                    renderCategoryMenu();
+                    return; // Success, exit the loop
+                } catch (error) {
+                    console.error('Entry page error with endpoint', endpoint, ':', error);
+                    if (endpoint === endpoints[endpoints.length - 1]) {
+                        // Last endpoint failed - show detailed error
+                        document.getElementById('categoryMenu').innerHTML = 
+                            '<li style="padding: 20px; color: #dc3545;">' +
+                            '<i class="fas fa-exclamation-triangle"></i> Error loading categories: ' + error.message + 
+                            '<br><small>Entry Page URL: ' + window.location.href + '</small>' +
+                            '<br><button onclick="loadCategoriesWithSubcategories()" class="btn btn-sm btn-primary mt-2">Retry</button>' +
+                            '<br><button onclick="window.testJavaScript()" class="test-btn mt-2">Test JS</button>' +
+                            '</li>';
+                    }
+                }
+            }
+        }
+        
+        // Render the modern category menu with mega dropdowns
+        function renderCategoryMenu() {
+            console.log('Entry page rendering modern category menu with', allCategories.length, 'categories');
+            console.log('Categories data:', allCategories);
+            
+            if (!allCategories || allCategories.length === 0) {
+                document.getElementById('categoryMenu').innerHTML = 
+                    '<li class="loading-menu">No categories available</li>';
+                return;
+            }
+            
+            try {
+                const menuHtml = allCategories.map((category, index) => {
+                    console.log('Processing category ' + (index + 1) + ':', category.name, 'with', category.subcategories ? category.subcategories.length : 'NO SUBCATEGORIES', 'subcategories');
+                    
+                    // Check if subcategories exist and are an array
+                    if (!category.subcategories || !Array.isArray(category.subcategories)) {
+                        console.error('Category ' + (index + 1) + ' has invalid subcategories:', category.subcategories);
+                        category.subcategories = [];
+                    }
+                    
+                    // Create simple subcategory display - only names
+                    const subcategorySections = [];
+                    
+                    // If we have subcategories, create a clean layout
+                    if (category.subcategories.length > 0) {
+                        // Calculate optimal columns based on subcategory count for elegant fit
+                        const subcategoryCount = category.subcategories.length;
+                        let columnsCount = 1;
+                        
+                        if (subcategoryCount > 15) columnsCount = 4;
+                        else if (subcategoryCount > 10) columnsCount = 3;
+                        else if (subcategoryCount > 5) columnsCount = 2;
+                        
+                        const itemsPerColumn = Math.ceil(subcategoryCount / columnsCount);
+                        
+                        // Create columns
+                        const columns = [];
+                        for (let i = 0; i < columnsCount; i++) {
+                            const startIndex = i * itemsPerColumn;
+                            const endIndex = Math.min(startIndex + itemsPerColumn, subcategoryCount);
+                            columns.push(category.subcategories.slice(startIndex, endIndex));
+                        }
+                        
+                        // Generate clean subcategories section - only names
+                        const columnsHtml = columns.map((columnItems, columnIndex) => {
+                            const subcategoriesHtml = columnItems.map((subcategory) => {
+                                return '<li class="subcategory-item">' +
+                                    '<a href="/categories/shopping?categoryId=' + category.id + '&categoryName=' + encodeURIComponent(category.name) + '&subcategoryId=' + subcategory.id + '&subcategoryName=' + encodeURIComponent(subcategory.name) + '" ' +
+                                       'class="subcategory-link" title="' + subcategory.name + '">' +
+                                        subcategory.name +
+                                    '</a>' +
+                                '</li>';
+                            }).join('');
+                            
+                            return '<div class="subcategory-column">' +
+                                    '<ul class="subcategory-list">' +
+                                        subcategoriesHtml +
+                                    '</ul>' +
+                                '</div>';
+                        }).join('');
+                        
+                        subcategorySections.push('<div class="dropdown-section">' +
+                                '<div class="subcategory-grid">' +
+                                    columnsHtml +
+                                '</div>' +
+                            '</div>'
+                        );
+                    }
+                    
+                    const isActive = category.subcategories.some(sub => sub.id == currentSubcategoryId) ? 'active' : '';
+                    
+                    const categoryHtml = '<li class="category-menu-item ' + isActive + '" data-category-index="' + index + '">' +
+                            '<a href="#" class="category-menu-link" onclick="event.preventDefault()">' +
+                                category.name +
+                            '</a>' +
+                            '<div class="mega-dropdown" data-dropdown-for="' + index + '">' +
+                                '<div class="mega-dropdown-content">' +
+                                    subcategorySections.join('') +
+                                '</div>' +
+                            '</div>' +
+                        '</li>';
+                    
+                    console.log('Generated mega dropdown HTML for "' + category.name + '"');
+                    return categoryHtml;
+                }).join('');
+                
+                console.log('Setting innerHTML with modern mega dropdown HTML for', allCategories.length, 'categories');
+                document.getElementById('categoryMenu').innerHTML = menuHtml;
+                console.log('Modern category menu rendered successfully');
+                
+                // Verify DOM elements
+                setTimeout(() => {
+                    const addedItems = document.querySelectorAll('.category-menu-item');
+                    const addedDropdowns = document.querySelectorAll('.mega-dropdown');
+                    console.log('DOM verification:');
+                    console.log('- Category items found:', addedItems.length);
+                    console.log('- Mega dropdown elements found:', addedDropdowns.length);
+                    
+                    addedItems.forEach((item, index) => {
+                        const dropdown = item.querySelector('.mega-dropdown');
+                        const subcategoryItems = dropdown ? dropdown.querySelectorAll('.subcategory-item') : [];
+                        console.log('Category ' + (index + 1) + ':', {
+                            element: item,
+                            hasMegaDropdown: !!dropdown,
+                            subcategoryCount: subcategoryItems.length,
+                            dropdownVisible: dropdown ? window.getComputedStyle(dropdown).display : 'no dropdown'
+                        });
+                    });
+                }, 100);
+                
+                // Setup modern hover interactions
+                setTimeout(() => {
+                    setupModernHoverInteractions();
+                }, 200);
+                
+            } catch (error) {
+                console.error('Error rendering modern category menu:', error);
+                document.getElementById('categoryMenu').innerHTML = 
+                    '<li class="loading-menu"><i class="fas fa-exclamation-triangle"></i> Error rendering menu: ' + error.message + '</li>';
+            }
+        }
+        
+        // Setup hover interactions for navigation menu (enhanced version)
+        function setupModernHoverInteractions() {
+            const categoryItems = document.querySelectorAll('.category-menu-item');
+            console.log('✅ Setting up modern hover interactions for', categoryItems.length, 'categories');
+            
+            categoryItems.forEach((item, index) => {
+                const dropdown = item.querySelector('.mega-dropdown');
+                const categoryLink = item.querySelector('.category-menu-link');
+                
+                if (!dropdown) {
+                    console.log('❌ No mega dropdown for category ' + (index + 1));
+                    return;
+                }
+                
+                console.log('✅ Adding modern hover to category ' + (index + 1) + ':', categoryLink ? categoryLink.textContent.trim() : 'unknown');
+                
+                let hoverTimeout;
+                
+                // Show dropdown on mouseenter
+                item.addEventListener('mouseenter', function(e) {
+                    console.log('🟢 MODERN HOVER ON: Category ' + (index + 1));
+                    clearTimeout(hoverTimeout);
+                    
+                    // Force show with direct styles and ensure visibility
+                    dropdown.style.opacity = '1';
+                    dropdown.style.visibility = 'visible';
+                    dropdown.style.transform = 'translateY(0)';
+                    dropdown.style.pointerEvents = 'auto';
+                    dropdown.style.display = 'block';
+                    dropdown.style.zIndex = '9999';
+                });
+                
+                // Hide dropdown on mouseleave with delay
+                item.addEventListener('mouseleave', function(e) {
+                    console.log('🔴 MODERN HOVER OFF: Category ' + (index + 1));
+                    
+                    hoverTimeout = setTimeout(() => {
+                        if (!dropdown.matches(':hover') && !item.matches(':hover')) {
+                            dropdown.style.opacity = '0';
+                            dropdown.style.visibility = 'hidden';
+                            dropdown.style.transform = 'translateY(-10px)';
+                            dropdown.style.pointerEvents = 'none';
+                            console.log('✅ Hidden mega dropdown ' + (index + 1));
+                        }
+                    }, 150);
+                });
+                
+                // Keep visible when hovering dropdown
+                dropdown.addEventListener('mouseenter', function() {
+                    console.log('🟡 Hovering mega dropdown ' + (index + 1));
+                    clearTimeout(hoverTimeout);
+                    dropdown.style.opacity = '1';
+                    dropdown.style.visibility = 'visible';
+                    dropdown.style.transform = 'translateY(0)';
+                    dropdown.style.pointerEvents = 'auto';
+                    dropdown.style.display = 'block';
+                });
+                
+                dropdown.addEventListener('mouseleave', function() {
+                    console.log('🟠 Left mega dropdown ' + (index + 1));
+                    dropdown.style.opacity = '0';
+                    dropdown.style.visibility = 'hidden';
+                    dropdown.style.transform = 'translateY(-10px)';
+                    dropdown.style.pointerEvents = 'none';
+                });
+            });
+            
+            console.log('✅ Modern hover interactions setup complete');
+        }
+        
+        // Add to cart functionality
+        function addToCart(productId) {
+            console.log('Entry page - Adding product to cart:', productId);
+            
+            // Show success modal
+            $('#successModal').modal('show');
+            
+            // Add some visual feedback
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Added!';
+            button.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+            }, 2000);
+            
+            // Here you can add actual cart functionality
+            console.log('Entry page - Cart functionality can be implemented here');
+        }
+        
+        // View product details - Navigate to product description page
+        function viewProductDetails(productId) {
+            console.log('Navigating to product details for product ID:', productId);
+            
+            // Add loading animation to the clicked card
+            const clickedCard = event.currentTarget;
+            clickedCard.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                // Navigate to product description page
+                window.location.href = '/products/' + productId;
+            }, 150);
+        }
+        
+        // Add some page-specific enhancements
+        window.addEventListener('load', function() {
+            console.log('Entry page fully loaded!');
+            
+            // Add smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+        
+        // ========== Blinkit-Style Shopping Cart Functionality ==========
+        
+        // Cart storage key
+        const CART_STORAGE_KEY = 'onlineGroceryCart';
+        
+        // Initialize cart on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBlinkitCartDisplay();
+            updateProductCardStates();
+        });
+        
+        // Get cart from localStorage
+        function getCart() {
+            const cart = localStorage.getItem(CART_STORAGE_KEY);
+            return cart ? JSON.parse(cart) : {};
+        }
+        
+        // Save cart to localStorage
+        function saveCart(cart) {
+            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+        }
+        
+        // Blinkit-style add to cart function
+        function blinkitAddToCart(productId) {
+            const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+            if (!productCard) {
+                console.error('Product card not found for ID:', productId);
+                return;
+            }
+            
+            const productName = productCard.dataset.productName;
+            const productPrice = parseFloat(productCard.dataset.productPrice);
+            
+            if (!productName || isNaN(productPrice)) {
+                console.error('Invalid product data:', { productName, productPrice });
+                return;
+            }
+            
+            const cart = getCart();
+            
+            if (cart[productId]) {
+                cart[productId].quantity += 1;
+            } else {
+                cart[productId] = {
+                    id: productId,
+                    name: productName,
+                    price: productPrice,
+                    quantity: 1
+                };
+            }
+            
+            saveCart(cart);
+            updateBlinkitCartDisplay();
+            updateProductCardState(productId);
+            
+            // Show Blinkit-style feedback
+            showBlinkitFeedback(`${productName} added to cart`);
+        }
+        
+        // Update product quantity in cart
+        function updateProductQuantity(productId, change) {
+            const cart = getCart();
+            if (cart[productId]) {
+                cart[productId].quantity += change;
+                
+                if (cart[productId].quantity <= 0) {
+                    delete cart[productId];
+                } else {
+                    cart[productId].quantity = Math.max(1, cart[productId].quantity);
+                }
+                
+                saveCart(cart);
+                updateBlinkitCartDisplay();
+                updateProductCardState(productId);
+                updateCartModal();
+            }
+        }
+        
+        // Remove product from cart completely
+        function removeFromCart(productId) {
+            const cart = getCart();
+            if (cart[productId]) {
+                delete cart[productId];
+                saveCart(cart);
+                updateBlinkitCartDisplay();
+                updateProductCardState(productId);
+                updateCartModal();
+            }
+        }
+        
+        // Update product card state based on cart
+        function updateProductCardState(productId) {
+            const cart = getCart();
+            const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+            if (!productCard) return;
+            
+            const addButton = productCard.querySelector('.add-to-cart-btn');
+            const qtyControls = productCard.querySelector('.product-quantity-controls');
+            const qtyValue = productCard.querySelector('.product-qty-value');
+            
+            if (cart[productId] && cart[productId].quantity > 0) {
+                // Show quantity controls, hide add button
+                addButton.style.display = 'none';
+                qtyControls.classList.add('show');
+                if (qtyValue) {
+                    qtyValue.textContent = cart[productId].quantity;
+                }
+            } else {
+                // Show add button, hide quantity controls
+                addButton.style.display = 'block';
+                qtyControls.classList.remove('show');
+            }
+        }
+        
+        // Update all product card states
+        function updateProductCardStates() {
+            const cart = getCart();
+            Object.keys(cart).forEach(productId => {
+                updateProductCardState(productId);
+            });
+        }
+        
+        // Clear entire cart
+        function clearCart() {
+            if (confirm('Are you sure you want to clear your cart?')) {
+                localStorage.removeItem(CART_STORAGE_KEY);
+                updateBlinkitCartDisplay();
+                updateProductCardStates();
+                updateCartModal();
+                showBlinkitFeedback('Cart cleared');
+            }
+        }
+        
+        // Update Blinkit-style cart display
+        function updateBlinkitCartDisplay() {
+            const cart = getCart();
+            const cartItems = Object.values(cart);
+            const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+            const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+            
+            const cartContainer = document.querySelector('.blinkit-cart-container');
+            const cartCountBadge = document.getElementById('cartCountBadge');
+            const cartCountText = document.getElementById('cartCountText');
+            const cartTotalText = document.getElementById('cartTotalText');
+            
+            if (cartContainer) {
+                if (cartCount > 0) {
+                    cartContainer.classList.add('has-items');
+                } else {
+                    cartContainer.classList.remove('has-items');
+                }
+            }
+            
+            if (cartCountBadge) {
+                cartCountBadge.textContent = cartCount;
+            }
+            
+            if (cartCountText) {
+                cartCountText.textContent = cartCount === 1 ? '1 item' : `${cartCount} items`;
+            }
+            
+            if (cartTotalText) {
+                cartTotalText.textContent = `₹ ${cartTotal.toFixed(0)}`;
+            }
+        }
+        
+        // Toggle cart modal visibility
+        function toggleCartModal() {
+            const modal = document.getElementById('cartModal');
+            if (modal.style.display === 'block') {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'block';
+                updateCartModal();
+            }
+        }
+        
+        // Update cart modal content with Blinkit styling
+        function updateCartModal() {
+            const cart = getCart();
+            const cartItems = Object.values(cart);
+            const cartItemsContainer = document.getElementById('cartItems');
+            const cartTotalAmount = document.getElementById('cartTotalAmount');
+            
+            if (cartItems.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h4>Your cart is empty</h4>
+                        <p>Add items to get started</p>
+                    </div>
+                `;
+                if (cartTotalAmount) cartTotalAmount.textContent = '0';
+                return;
+            }
+            
+            const cartItemsHTML = cartItems.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-image">
+                        ${item.name.substring(0, 3).toUpperCase()}
+                    </div>
+                    <div class="cart-item-details">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">₹${item.price}</div>
+                    </div>
+                    <div class="cart-item-controls">
+                        <div class="blinkit-quantity-control">
+                            <button class="blinkit-quantity-btn" onclick="updateProductQuantity('${item.id}', -1)" ${item.quantity <= 1 ? 'disabled' : ''}>
+                                −
+                            </button>
+                            <span class="blinkit-quantity-value">${item.quantity}</span>
+                            <button class="blinkit-quantity-btn" onclick="updateProductQuantity('${item.id}', 1)">
+                                +
+                            </button>
+                        </div>
+                        <button class="blinkit-remove-item" onclick="removeFromCart('${item.id}')" title="Remove item">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            cartItemsContainer.innerHTML = cartItemsHTML;
+            
+            // Update total
+            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            if (cartTotalAmount) cartTotalAmount.textContent = total.toFixed(0);
+        }
+        
+        // Show Blinkit-style feedback message
+        function showBlinkitFeedback(message) {
+            // Create or update feedback element
+            let feedback = document.getElementById('blinkitFeedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.id = 'blinkitFeedback';
+                feedback.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(100px);
+                    background: #333;
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    z-index: 10001;
+                    transition: transform 0.3s ease;
+                    white-space: nowrap;
+                `;
+                document.body.appendChild(feedback);
+            }
+            
+            feedback.textContent = message;
+            feedback.style.transform = 'translateX(-50%) translateY(0)';
+            
+            // Hide after 2 seconds
+            setTimeout(() => {
+                feedback.style.transform = 'translateX(-50%) translateY(100px)';
+            }, 2000);
+        }
+        
+        // Proceed to checkout (Blinkit-style)
+        function proceedToCheckout() {
+            const cart = getCart();
+            const cartItems = Object.values(cart);
+            
+            if (cartItems.length === 0) {
+                showBlinkitFeedback('Your cart is empty');
+                return;
+            }
+            
+            // This would typically navigate to checkout page
+            showBlinkitFeedback('Redirecting to checkout...');
+            console.log('Cart items for checkout:', cartItems);
+            
+            // Simulate navigation delay
+            setTimeout(() => {
+                alert('Checkout functionality will be implemented here!');
+            }, 1000);
+        }
+        
+        // Close cart modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('cartModal');
+            const cartContainer = document.querySelector('.blinkit-cart-container');
+            
+            if (modal && modal.style.display === 'block') {
+                if (!modal.contains(event.target) && !cartContainer.contains(event.target)) {
+                    modal.style.display = 'none';
+                }
+            }
+        });
+        
+        // Legacy function for compatibility
+        function addToCart(productId) {
+            blinkitAddToCart(productId);
+        }
+    </script>
+</body>
+</html>

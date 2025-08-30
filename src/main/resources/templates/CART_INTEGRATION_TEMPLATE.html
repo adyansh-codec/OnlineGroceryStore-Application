@@ -1,0 +1,75 @@
+<!-- Centralized Cart Styles -->
+<div th:replace="fragments/blinkit-cart :: blinkit-cart-styles"></div>
+<button th:onclick="|addToCentralizedCart('${product.id}', '${product.name}', '${product.price}', '${product.imageUrl}', '${product.unit}', ${product.originalPrice})|">
+    <i class="fas fa-shopping-bag"></i> ADD TO CART
+</button>
+<!-- Centralized Shopping Cart -->
+<div th:replace="fragments/blinkit-cart :: blinkit-cart"></div>
+
+<!-- Centralized Cart Scripts -->
+<script src="/js/centralized-cart.js"></script>
+<!-- CENTRALIZED CART IMPLEMENTATION GUIDE -->
+<!-- Use this template to add the Blinkit-style cart to ANY page in your application -->
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page Title</title>
+    
+    <!-- Standard CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/home.css"/>
+    
+    <!-- 🛒 STEP 1: Include Centralized Cart Styles -->
+    <div th:replace="fragments/blinkit-cart :: blinkit-cart-styles"></div>
+    
+    <!-- Your existing page styles -->
+    <style>
+        /* Your page-specific styles here */
+    </style>
+</head>
+<body>
+    <!-- Your page content here -->
+    
+    <!-- Example: Product Cards using the centralized cart -->
+    <div class="product-card" th:if="${products != null}">
+        <div th:each="product : ${products}">
+            <h5 th:text="${product.name}">Product Name</h5>
+            <p th:text="'₹' + ${product.price}">Price</p>
+            
+            <!-- 🛒 STEP 2: Add to Cart Button -->
+            <button class="btn btn-success" 
+                    th:onclick="|addToCentralizedCart('${product.id}', '${product.name}', '${product.discountedPrice ?: product.price}', '${product.imageUrl}', '${product.unit ?: '1 piece'}', ${product.discountedPrice != null ? product.price : 'null'})|">
+                <i class="fas fa-shopping-bag"></i> ADD TO CART
+            </button>
+        </div>
+    </div>
+    
+    <!-- 🛒 STEP 3: Include Centralized Cart Component -->
+    <div th:replace="fragments/blinkit-cart :: blinkit-cart"></div>
+    
+    <!-- Standard Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 🛒 STEP 4: Include Centralized Cart JavaScript -->
+    <script src="/js/centralized-cart.js"></script>
+    
+    <!-- Your page-specific scripts -->
+    <script>
+        // Your JavaScript code here
+        
+        // Example: Custom add to cart function for special cases
+        function customAddToCart(productId, productName, price, imageUrl) {
+            if (typeof addToCentralizedCart === 'function') {
+                addToCentralizedCart(productId, productName, price, imageUrl, '1 piece', null);
+            } else {
+                console.error('Centralized cart not available');
+            }
+        }
+    </script>
+</body>
+</html>

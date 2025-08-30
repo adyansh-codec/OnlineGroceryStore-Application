@@ -5,11 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static org.softuni.onlinegrocery.util.constants.AppConstants.EMPTY_STRING;
-
-@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface PageTitle {
-
-    String value() default EMPTY_STRING;
+    String value();
 }

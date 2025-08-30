@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Products</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/home.css"/>
+    
+    <style>
+        /* Category Menu Bar Styles */
+        .category-menu-bar {
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            margin-bottom: 20px;
+        }
+        
+        .category-menu-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .category-menu {
+            display: flex;
+            overflow-x: auto;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .category-menu::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .category-menu-item {
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .category-menu-link {
+            display: block;
+            padding: 15px 20px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .category-menu-link:hover {
+            color: #007bff;
+            background: #f8f9fa;
+            border-bottom-color: #007bff;
+            text-decoration: none;
+        }
+        
+        .category-menu-item.active .category-menu-link {
+            color: #007bff;
+            background: #f0f8ff;
+            border-bottom-color: #007bff;
+        }
+        
+        /* Subcategory Dropdown Styles */
+        .subcategory-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 250px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .category-menu-item:hover .subcategory-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .subcategory-dropdown-header {
+            padding: 15px 20px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .subcategory-dropdown-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .subcategory-list {
+            padding: 10px 0;
+            margin: 0;
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .subcategory-item {
+            margin: 0;
+        }
+        
+        .subcategory-link {
+            display: block;
+            padding: 10px 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .subcategory-link:hover {
+            color: #007bff;
+            background: #f0f8ff;
+            border-left-color: #007bff;
+            text-decoration: none;
+            padding-left: 25px;
+        }
+        
+        .subcategory-product-count {
+            float: right;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        /* Product Grid Styles */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .product-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #007bff;
+        }
+        
+        .product-image {
+            height: 200px;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-info {
+            padding: 15px;
+        }
+        
+        .product-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            line-height: 1.3;
+        }
+        
+        .product-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .product-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        
+        .product-details {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+        
+        .back-btn {
+            margin: 20px;
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        .no-products {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .no-products i {
+            font-size: 64px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        
+        /* Loading Animation */
+        .loading-menu {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .loading-menu i {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .category-menu-link {
+                padding: 12px 15px;
+                font-size: 13px;
+            }
+            
+            .subcategory-dropdown {
+                min-width: 200px;
+            }
+            
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+                padding: 15px;
+            }
+        }
+        
+        .view-details-btn {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .view-details-btn:hover {
+            background: #0056b3;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <!-- Category Menu Bar -->
+    <div class="category-menu-bar">
+        <div class="category-menu-container">
+            <ul class="category-menu" id="categoryMenu">
+                <li class="loading-menu">
+                    <i class="fas fa-spinner"></i> Loading categories...
+                    <button onclick="window.testJavaScript()" style="margin-left: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 4px;">Test JS</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Back to Home Button -->
+    <a href="/home" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1 th:text="${pageTitle}">Products</h1>
+            <p th:if="${subcategoryName}" th:text="'Browse all products in ' + ${subcategoryName}">Browse products</p>
+            <p th:unless="${subcategoryName}">Browse all available products</p>
+        </div>
+    </div>
+    
+    <!-- Products Grid -->
+    <div class="container-fluid">
+        <div th:if="${products != null and !products.empty}" class="product-grid">
+            <div th:each="product : ${products}" class="product-card">
+                <div class="product-image">
+                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}" 
+                         th:alt="${product.name}"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#f8f9fa;color:#6c757d;font-weight:600;\'>' + this.alt + '</div>'">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name" th:text="${product.name}">Product Name</h3>
+                    <p class="product-description" th:text="${product.description}">Product description</p>
+                    <div class="product-price" th:text="'₹' + ${product.price}">₹0.00</div>
+                    <div class="product-details">
+                        <span th:if="${product.brand}" th:text="'Brand: ' + ${product.brand}"></span>
+                        <span th:if="${product.unit}" th:text="' | Unit: ' + ${product.unit}"></span>
+                        <span th:if="${product.quantity}" th:text="' | Stock: ' + ${product.quantity}"></span>
+                    </div>
+                    <a th:href="@{'/products/' + ${product.id}}" class="view-details-btn">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- No Products Message -->
+        <div th:if="${products == null or products.empty}" class="no-products">
+            <i class="fas fa-box-open"></i>
+            <h3>No Products Found</h3>
+            <p th:if="${subcategoryName}" th:text="'No products available in ' + ${subcategoryName} + ' category.'">No products found</p>
+            <p th:unless="${subcategoryName}">No products are currently available.</p>
+            <a href="/home" class="btn btn-primary mt-3">
+                <i class="fas fa-home"></i> Go Back to Home
+            </a>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Debug function to test if JavaScript is working - make it global
+        window.testJavaScript = function() {
+            console.log('JavaScript is working!');
+            alert('JavaScript is working!');
+        };
+        
+        // Global variables
+        let allCategories = [];
+        let currentSubcategoryId = null;
+        
+        // Get subcategory ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        currentSubcategoryId = urlParams.get('subcategoryId');        
+        
+        // Load categories with subcategories on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, starting category load...');
+            
+            // Check if the menu element exists
+            const menuElement = document.getElementById('categoryMenu');
+            if (!menuElement) {
+                console.error('Category menu element not found!');
+                return;
+            }
+            
+            // Show a test message first
+            menuElement.innerHTML = '<li style="padding: 15px; color: #007bff;">DOM is ready, attempting to load categories...</li>';
+            
+            // Add a small delay to ensure everything is ready
+            setTimeout(() => {
+                loadCategoriesWithSubcategories();
+            }, 1000);
+            
+            // Add entrance animations to product cards
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+        
+        // Load all categories with their subcategories
+        async function loadCategoriesWithSubcategories() {
+            console.log('Starting to load categories...');
+            
+            // First, let's test if we can reach the server at all
+            try {
+                console.log('Testing server connectivity...');
+                const testResponse = await fetch(window.location.origin);
+                console.log('Server test response status:', testResponse.status);
+            } catch (error) {
+                console.error('Server connectivity test failed:', error);
+            }
+            
+            const endpoints = [
+                '/api/categories/with-subcategories',
+                window.location.origin + '/api/categories/with-subcategories'
+            ];
+            
+            for (let endpoint of endpoints) {
+                try {
+                    console.log('Trying endpoint:', endpoint);
+                    const response = await fetch(endpoint);
+                    console.log('Response status:', response.status);
+                    console.log('Response ok:', response.ok);
+                    console.log('Response headers:', response.headers);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.log('Error response text:', errorText);
+                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Received data:', data);
+                    allCategories = data;
+                    
+                    if (!data || data.length === 0) {
+                        console.log('No categories found');
+                        document.getElementById('categoryMenu').innerHTML = 
+                            '<li style="padding: 15px; color: #666;">No categories available</li>';
+                        return;
+                    }
+                    
+                    renderCategoryMenu();
+                    return; // Success, exit the loop
+                } catch (error) {
+                    console.error('Error with endpoint', endpoint, ':', error);
+                    if (endpoint === endpoints[endpoints.length - 1]) {
+                        // Last endpoint failed - show a more detailed error
+                        document.getElementById('categoryMenu').innerHTML = 
+                            '<li style="padding: 15px; color: #dc3545;">' +
+                            'Error loading categories: ' + error.message + 
+                            '<br><small>Current URL: ' + window.location.href + '</small>' +
+                            '<br><button onclick="loadCategoriesWithSubcategories()" class="btn btn-sm btn-primary mt-2">Retry</button>' +
+                            '<br><button onclick="window.testJavaScript()" class="btn btn-sm btn-success mt-2">Test JS</button>' +
+                            '</li>';
+                    }
+                }
+            }
+        }
+        
+        // Render the category menu
+        function renderCategoryMenu() {
+            console.log('Rendering category menu with', allCategories.length, 'categories');
+            
+            if (!allCategories || allCategories.length === 0) {
+                document.getElementById('categoryMenu').innerHTML = 
+                    '<li style="padding: 15px; color: #666;">No categories available</li>';
+                return;
+            }
+            
+            try {
+                const menuHtml = allCategories.map(category => {
+                    console.log('Processing category:', category.name, 'with', category.subcategories.length, 'subcategories');
+                    
+                    const subcategoriesHtml = category.subcategories.map(subcategory => 
+                        `<li class="subcategory-item">
+                            <a href="/entry?subcategoryId=${subcategory.id}&subcategoryName=${encodeURIComponent(subcategory.name)}" 
+                               class="subcategory-link" target="_blank">
+                                ${subcategory.name}
+                                <span class="subcategory-product-count">${subcategory.productCount || 0}</span>
+                            </a>
+                        </li>`
+                    ).join('');
+                    
+                    const isActive = category.subcategories.some(sub => sub.id == currentSubcategoryId) ? 'active' : '';
+                    
+                    return `
+                        <li class="category-menu-item ${isActive}">
+                            <a href="#" class="category-menu-link" onclick="event.preventDefault()">
+                                ${category.name}
+                            </a>
+                            <div class="subcategory-dropdown">
+                                <div class="subcategory-dropdown-header">
+                                    <h4 class="subcategory-dropdown-title">${category.name}</h4>
+                                </div>
+                                <ul class="subcategory-list">
+                                    ${subcategoriesHtml}
+                                </ul>
+                            </div>
+                        </li>
+                    `;
+                }).join('');
+                
+                console.log('Setting innerHTML with generated HTML');
+                document.getElementById('categoryMenu').innerHTML = menuHtml;
+                console.log('Category menu rendered successfully');
+            } catch (error) {
+                console.error('Error rendering category menu:', error);
+                document.getElementById('categoryMenu').innerHTML = 
+                    '<li style="padding: 15px; color: #dc3545;">Error rendering menu: ' + error.message + '</li>';
+            }
+        }
+        
+    </script>
+</body>
+</html>

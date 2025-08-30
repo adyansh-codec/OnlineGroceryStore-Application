@@ -30,4 +30,6 @@ public class Category extends BaseEntity {
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
     }
+
+	
 }

@@ -24,7 +24,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
-    private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -35,7 +34,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                            BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
-        this.productRepository = productRepository;
         this.modelMapper = modelMapper;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
@@ -141,5 +139,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
 
         return roles;
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return this.userRepository.findByEmail(email).orElse(null);
     }
 }

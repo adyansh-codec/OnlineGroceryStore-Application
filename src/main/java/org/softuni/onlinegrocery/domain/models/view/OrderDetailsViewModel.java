@@ -14,7 +14,7 @@ public class OrderDetailsViewModel {
     private LocalDateTime issuedOn;
     private LocalDateTime statusDate;
     private String shippingAddress;
-    private List<ShoppingCartItem> items;
+  
     private Status status;
     private BigDecimal totalPrice;
     private User customer;
@@ -51,13 +51,7 @@ public class OrderDetailsViewModel {
         this.shippingAddress = shippingAddress;
     }
 
-    public List<ShoppingCartItem> getItems() {
-        return this.items;
-    }
-
-    public void setItems(List<ShoppingCartItem> items) {
-        this.items = items;
-    }
+    
 
     public Status getStatus() {
         return this.status;

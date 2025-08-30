@@ -1,0 +1,362 @@
+<!-- Related Products Section - Complete Implementation -->
+<div id="related-products-section" class="container-fluid mt-5 py-4" style="display: none; background-color: #f8f9fa;">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h3 class="fw-bold text-dark">
+                    <i class="fas fa-boxes me-2"></i>
+                    Related Products
+                </h3>
+                <p class="text-muted">Products from the same category you might like</p>
+            </div>
+        </div>
+        
+        <!-- Loading indicator -->
+        <div id="loading-indicator" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Loading related products...</p>
+        </div>
+        
+        <!-- Products Grid -->
+        <div class="row" id="related-products-container">
+            <!-- Product cards will be inserted here by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- CSS Styles -->
+<style>
+.related-products-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+}
+
+.related-products-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.related-products-card .card-img-top {
+    transition: transform 0.3s ease;
+}
+
+.related-products-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+.related-products-card .btn {
+    transition: all 0.2s ease;
+}
+
+.related-products-card .btn:hover {
+    transform: translateY(-1px);
+}
+
+#related-products-section {
+    border-top: 3px solid #007bff;
+}
+
+@media (max-width: 768px) {
+    .related-products-card .card-title {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<!-- JavaScript - Complete Related Products Functionality -->
+<script>
+// Force immediate execution with detailed logging
+console.log('=== RELATED PRODUCTS DEBUG START ===');
+console.log('Current URL:', window.location.href);
+console.log('Current pathname:', window.location.pathname);
+
+// Function to extract product ID from multiple sources
+function getProductId() {
+    console.log('Attempting to extract product ID from multiple sources...');
+    
+    // Method 1: Check for Thymeleaf variable (for productdesc.html)
+    if (typeof productId !== 'undefined' && productId && productId !== 0) {
+        console.log('Found productId from Thymeleaf variable:', productId);
+        return productId;
+    }
+    
+    // Method 2: Check for data attribute on add to cart button
+    const addToCartBtn = document.querySelector('[data-product-id]');
+    if (addToCartBtn) {
+        const dataProductId = addToCartBtn.getAttribute('data-product-id');
+        if (dataProductId && dataProductId !== '0') {
+            console.log('Found productId from data attribute:', dataProductId);
+            return dataProductId;
+        }
+    }
+    
+    // Method 3: Check for product ID in meta tags
+    const metaProductId = document.querySelector('meta[name="product-id"]');
+    if (metaProductId) {
+        const metaId = metaProductId.getAttribute('content');
+        if (metaId && metaId !== '0') {
+            console.log('Found productId from meta tag:', metaId);
+            return metaId;
+        }
+    }
+    
+    // Method 4: Extract from NEW URL pattern /productdesc/{id}
+    const path = window.location.pathname;
+    console.log('Checking URL path:', path);
+    
+    const productDescMatch = path.match(/\/productdesc\/(.+)$/);
+    if (productDescMatch) {
+        const urlProductId = productDescMatch[1];
+        console.log('Found productId from /productdesc/{id} URL:', urlProductId);
+        return urlProductId;
+    }
+    
+    // Method 5: Extract from URL pattern /products/{id} (for direct product pages)
+    const productIdMatch = path.match(/\/products\/(.+)$/);
+    if (productIdMatch) {
+        const urlProductId = productIdMatch[1];
+        console.log('Found productId from /products/{id} URL:', urlProductId);
+        return urlProductId;
+    }
+    
+    // Method 6: Check for hidden input field with product ID
+    const hiddenInput = document.querySelector('input[name="productId"], input[name="id"][type="hidden"]');
+    if (hiddenInput) {
+        const inputId = hiddenInput.value;
+        if (inputId && inputId !== '0') {
+            console.log('Found productId from hidden input:', inputId);
+            return inputId;
+        }
+    }
+    
+    // Method 7: Check for product data in window object
+    if (typeof window.currentProduct !== 'undefined' && window.currentProduct && window.currentProduct.id) {
+        console.log('Found productId from window.currentProduct:', window.currentProduct.id);
+        return window.currentProduct.id;
+    }
+    
+    console.log('ERROR: No product ID found from any source');
+    return null;
+}
+
+// Function to load related products
+function loadRelatedProductsNow() {
+    console.log('loadRelatedProductsNow() called');
+    
+    // Get product ID from multiple sources
+    const currentProductId = getProductId();
+    
+    if (!currentProductId) {
+        console.log('ERROR: No product ID found');
+        showDebugMessage('No product ID found. Current URL: ' + window.location.pathname + '. Available sources checked: Thymeleaf variable, data attributes, meta tags, URL pattern, hidden inputs, window object.');
+        return;
+    }
+    
+    console.log('Using product ID:', currentProductId);
+    
+    // Show the section and loading indicator
+    const section = document.getElementById('related-products-section');
+    const loadingDiv = document.getElementById('loading-indicator');
+    const container = document.getElementById('related-products-container');
+    
+    console.log('Section element:', section);
+    console.log('Loading element:', loadingDiv);
+    console.log('Container element:', container);
+    
+    if (!section || !container) {
+        console.log('ERROR: Required HTML elements not found');
+        return;
+    }
+    
+    section.style.display = 'block';
+    if (loadingDiv) loadingDiv.style.display = 'block';
+    container.innerHTML = '';
+    
+    // Make API call
+    const apiUrl = `/products/api/related/${currentProductId}`;
+    console.log('Making API call to:', apiUrl);
+    
+    fetch(apiUrl)
+        .then(response => {
+            console.log('API Response received. Status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            return response.json();
+        })
+        .then(products => {
+            console.log('Products received from API:', products);
+            console.log('Number of products:', products ? products.length : 0);
+            
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            
+            if (!products || products.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> No related products found for this product.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Create cards for each product
+            products.forEach((product, index) => {
+                console.log(`Creating card for product ${index + 1}:`, product.name);
+                const card = createProductCardInline(product);
+                container.appendChild(card);
+            });
+            
+            console.log(`Successfully displayed ${products.length} product cards`);
+        })
+        .catch(error => {
+            console.error('ERROR fetching related products:', error);
+            
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger text-center">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Error loading related products: ${error.message}
+                        <br><small>Check console for details</small>
+                    </div>
+                </div>
+            `;
+        });
+}
+
+// Function to create product card
+function createProductCardInline(product) {
+    console.log('Creating card for product:', product.name);
+    
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'col-lg-3 col-md-4 col-sm-6 mb-4';
+    
+    const imageUrl = product.imageUrl || 'https://via.placeholder.com/200x200?text=No+Image';
+    const price = product.discountedPrice ? 
+        `<div class="mb-2">
+            <span class="text-danger fw-bold">$${product.discountedPrice}</span>
+            <small class="text-muted text-decoration-line-through ms-2">$${product.price}</small>
+         </div>` :
+        `<div class="mb-2">
+            <span class="text-primary fw-bold">$${product.price || 'N/A'}</span>
+         </div>`;
+    
+    const stockInfo = (product.quantity && product.quantity > 0) ? 
+        `<small class="text-success">✓ In Stock (${product.quantity})</small>` :
+        `<small class="text-danger">✗ Out of Stock</small>`;
+    
+    cardDiv.innerHTML = `
+        <div class="card h-100 shadow-sm related-products-card">
+            <div class="position-relative">
+                <img src="${imageUrl}" 
+                     class="card-img-top" 
+                     alt="${product.name || 'Product'}" 
+                     style="height: 200px; object-fit: cover;"
+                     onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
+                ${product.discountedPrice ? '<span class="badge bg-danger position-absolute top-0 end-0 m-2">SALE</span>' : ''}
+            </div>
+            
+            <div class="card-body d-flex flex-column">
+                <h6 class="card-title">${product.name || 'Unnamed Product'}</h6>
+                <p class="card-text text-muted small flex-grow-1">
+                    ${product.description ? (product.description.length > 60 ? product.description.substring(0, 60) + '...' : product.description) : 'No description available'}
+                </p>
+                
+                ${product.brand ? `<small class="text-muted">Brand: ${product.brand}</small>` : ''}
+                ${product.unit ? `<small class="text-muted">Unit: ${product.unit}</small>` : ''}
+                <div class="mt-2">${stockInfo}</div>
+                
+                ${price}
+            </div>
+            
+            <div class="card-footer bg-light">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="/products/${product.id}" class="btn btn-outline-primary btn-sm">
+                        View Details
+                    </a>
+                    ${(product.quantity && product.quantity > 0) ? 
+                        `<button onclick="addToCartInline('${product.id}')" class="btn btn-success btn-sm">
+                            Add to Cart
+                         </button>` :
+                        `<button class="btn btn-secondary btn-sm" disabled>
+                            Out of Stock
+                         </button>`
+                    }
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return cardDiv;
+}
+
+// Add to cart function
+function addToCartInline(productId) {
+    console.log('Adding to cart:', productId);
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/cart/add-product';
+    
+    const idInput = document.createElement('input');
+    idInput.type = 'hidden';
+    idInput.name = 'id';
+    idInput.value = productId;
+    
+    const quantityInput = document.createElement('input');
+    quantityInput.type = 'hidden';
+    quantityInput.name = 'quantity';
+    quantityInput.value = '1';
+    
+    form.appendChild(idInput);
+    form.appendChild(quantityInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Debug message function
+function showDebugMessage(message) {
+    const container = document.getElementById('related-products-container');
+    if (container) {
+        document.getElementById('related-products-section').style.display = 'block';
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-bug"></i> DEBUG: ${message}
+                    <br><small>Check browser console for detailed logs</small>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Execute immediately when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded - executing related products');
+        setTimeout(loadRelatedProductsNow, 100); // Small delay to ensure everything is ready
+    });
+} else {
+    console.log('DOM already loaded - executing related products immediately');
+    setTimeout(loadRelatedProductsNow, 100);
+}
+
+// Also try to execute after a delay as backup
+setTimeout(function() {
+    console.log('Backup execution after 2 seconds');
+    const container = document.getElementById('related-products-container');
+    if (container && !container.innerHTML.trim()) {
+        loadRelatedProductsNow();
+    }
+}, 2000);
+
+console.log('=== RELATED PRODUCTS DEBUG END ===');
+</script>

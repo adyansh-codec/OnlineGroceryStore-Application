@@ -1,43 +1,1081 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
-<th:block>
-    <div th:replace="fragments/head.html :: head"></div>
-</th:block>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"/>
+  <!-- External CSS -->
+  <link rel="stylesheet" href="/css/home.css"/>
+  <link rel="stylesheet" href="css/product-card.css">
+  
+  <!-- Blinkit Cart System -->
+  <script src="/js/blinkit-cart.js"></script>
+  
+  <!-- Carousel Custom Styles -->
+  
+  <!-- Subcategory Carousel Styles -->
+  <style>
+    /* Optimized body and global spacing */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+    }
+    
+    /* Category Section Styles - Reduced spacing */
+    .category-section {
+      margin-bottom: 25px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+    }
+    
+    .simple-category-title {
+      background: white;
+      color: #333;
+      padding: 12px 20px;
+      margin-bottom: 0;
+      font-size: 18px;
+      font-weight: 700;
+      border-radius: 12px 12px 0 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .subcategory-carousel-wrapper {
+      position: relative;
+      padding: 20px 50px;
+      background: #fafafa;
+    }
+    
+    .subcategory-track {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 20px;
+      transition: transform 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .subcategory-card {
+      min-width: 160px;
+      max-width: 160px;
+      border: 1px solid #f0f0f0;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      flex-shrink: 0;
+    }
+    
+    .subcategory-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+      border-color: #0c7d40;
+    }
+    
+    .subcategory-image {
+      height: 100px;
+      overflow: hidden;
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+    
+    .subcategory-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+    
+    .subcategory-card:hover .subcategory-image img {
+      transform: scale(1.1);
+    }
+    
+    .subcategory-content {
+      padding: 12px;
+      text-align: center;
+    }
+    
+    .subcategory-name {
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: #333;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .subcategory-description {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 8px;
+      line-height: 1.2;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .subcategory-product-count {
+      font-size: 10px;
+      color: #0c7d40;
+      font-weight: 500;
+      text-align: center;
+    }
+    
+    .subcategory-product-count .loading-dots {
+      color: #999;
+      font-size: 10px;
+    }
+    
+    .subcategory-product-count .product-count {
+      color: #0c7d40;
+      background: #e8f5e8;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    
+    .subcategory-product-count .error {
+      color: #dc3545;
+      font-size: 10px;
+    }
+    
+    .carousel-nav-btn {
+      position: absolute;
+      top: 50%;
+      z-index: 2;
+      transform: translateY(-50%);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ddd;
+      background: white;
+      color: #666;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+    
+    .carousel-nav-btn:hover {
+      background: #f8f9fa;
+      color: #333;
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .carousel-nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: translateY(-50%);
+    }
+    
+    .carousel-prev {
+      left: 15px;
+    }
+    
+    .carousel-next {
+      right: 15px;
+    }
+    
+    .loading-message {
+      color: #666;
+    }
+    
+    .loading-message i {
+      color: #007bff;
+    }
+    
+    .no-subcategories {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+      font-style: italic;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .subcategory-carousel-wrapper {
+        padding: 20px 50px;
+      }
+      
+      .subcategory-card {
+        min-width: 140px;
+        max-width: 140px;
+      }
+      
+      .subcategory-image {
+        height: 80px;
+        padding: 8px;
+      }
+      
+      .subcategory-content {
+        padding: 8px;
+      }
+      
+      .subcategory-name {
+        font-size: 11px;
+      }
+      
+      .subcategory-description {
+        font-size: 9px;
+      }
+      
+      .simple-category-title {
+        padding: 12px 20px;
+        font-size: 18px;
+      }
+      
+      .carousel-nav-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 12px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .subcategory-carousel-wrapper {
+        padding: 15px 40px;
+      }
+      
+      .subcategory-card {
+        min-width: 120px;
+        max-width: 120px;
+      }
+      
+      .subcategory-image {
+        height: 70px;
+        padding: 6px;
+      }
+      
+      .subcategory-content {
+        padding: 6px;
+      }
+      
+      .subcategory-name {
+        font-size: 10px;
+      }
+      
+      .subcategory-description {
+        font-size: 8px;
+      }
+      
+      .carousel-nav-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 10px;
+      }
+    }
+    
+    /* Categories Section - Moved from entry.html */
+    .categories-section {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px 15px;
+        background: #ffffff;
+    }
+    
+    .categories-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #212121;
+        margin-bottom: 20px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .categories-title i {
+        color: #0066cc;
+        font-size: 20px;
+    }
+    
+    /* Blinkit Category Grid - MultiImage__Grid inspired */
+    .blinkit-category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+        padding: 0;
+        max-width: 100%;
+    }
+    
+    .blinkit-category-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+        padding: 12px 8px;
+        text-align: center;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .blinkit-category-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        border-color: #0066cc;
+    }
+    
+    .blinkit-category-card:hover .category-card-image {
+        transform: scale(1.1);
+    }
+    
+    .category-card-image {
+        width: 70px;
+        height: 70px;
+        border-radius: 6px;
+        object-fit: cover;
+        margin-bottom: 8px;
+        transition: transform 0.3s ease;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+    
+    .category-card-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #212121;
+        line-height: 1.3;
+        margin: 0;
+        text-align: center;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .category-card-count {
+        font-size: 11px;
+        color: #666;
+        margin-top: 4px;
+        font-weight: 400;
+    }
+    
+    .category-grid-loading {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px;
+        color: #666;
+        font-size: 16px;
+        font-weight: 500;
+    }
+    
+    .category-grid-loading i {
+        color: #0066cc;
+        margin-right: 8px;
+        font-size: 18px;
+    }
+    
+    /* Responsive adjustments for category grid */
+    @media (max-width: 1200px) {
+        .blinkit-category-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 14px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .categories-section {
+            padding: 20px 15px;
+        }
+        
+        .categories-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .blinkit-category-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+        
+        .blinkit-category-card {
+            padding: 12px 8px;
+            min-height: 120px;
+        }
+        
+        .category-card-image {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 8px;
+        }
+        
+        .category-card-name {
+            font-size: 13px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .blinkit-category-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .blinkit-category-card {
+            padding: 10px 6px;
+            min-height: 100px;
+        }
+        
+        .category-card-image {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 6px;
+        }
+        
+        .category-card-name {
+            font-size: 12px;
+        }
+    }
+  </style>
+  
+</head>
 <body>
 
-<th:block>
-    <div th:replace="fragments/header.html :: header"></div>
-</th:block>
-<main>
-    <h3 th:text="|${greeting}, ${#authentication.getPrincipal().getUsername()}!|" class="text-center brush-script"></h3>
-    <div>
-        <div class="row d-flex justify-content-between">
-            <div class="data col-md">
-                <h1 class="text-center brush-script font-weight-bold" id="categoryTittle" th:text="|All Products|"></h1>
-                <div id="searchBar" class="input-group w-25">
-                        <span class="input-group-btn">
-                        <button class="btn btn-secondary mr-1" onclick="findProductByProductName()">
-                            <i class="fas fa-search"></i> Find</button>
-                        </span>
-                    <input type="text" th:name="username"
-                           class="form-control w-50" id="inputProductName"
-                           placeholder="Product name..."/>
-                </div>
-            </div>
-            <div class="print-container container-fluid">
-                <div class="row mb-4 d-flex justify-content-start products-data">
+<!-- Top right login button only -->
+<div style="position:fixed;top:20px;right:20px;z-index:999;display:flex;gap:12px;">
+  
+  <!-- Login/User Button - Dynamic based on authentication -->
+  <button type="button" 
+          th:if="${username == null or username == 'anonymousUser'}"
+          class="btn btn-primary" 
+          data-toggle="modal" 
+          data-target="#loginModal">
+    <i class="fas fa-sign-in-alt"></i> Login
+  </button>
+  
+  <button type="button" 
+          th:if="${username != null and username != 'anonymousUser'}"
+          class="btn btn-success" 
+          onclick="logout()">
+    <i class="fas fa-user"></i> <span th:text="${username}">User</span>
+  </button>
+  
+</div>
 
-                </div>
+<!-- Search box with reduced top spacing -->
+<div class="animated-search" style="margin-top: 80px;">
+  <div class="search-container" style="position:relative;">
+    <i class="fas fa-search"></i>
+    <input type="text" placeholder="Search..." class="search-input" id="productSearchInput" autocomplete="off">
+    <div class="btn-group ml-2" role="group" aria-label="Search type" style="position:static;">
+      <button type="button" class="btn btn-outline-primary active" id="toggleProduct">Product</button>
+      <button type="button" class="btn btn-outline-primary" id="toggleCategory">Category</button>
+    </div>
+    <div id="productList" class="list-group" style="position:absolute; top:100%; left:0; right:0; z-index:1000; display:none;"></div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title w-100 text-center font-weight-bold" id="loginModalLabel">Sign In to Your Account</h5>
+        <button type="button" class="close position-absolute right-0 mr-3 mt-2" data-dismiss="modal" aria-label="Close" style="z-index:2;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-0">
+        <section class="vh-100 m-0 d-flex align-items-center justify-content-center" style="background: #f8f9fa;">
+          <div class="container py-4">
+            <div class="row justify-content-center align-items-center">
+              <div class="col-md-6 d-none d-md-block">
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+                  class="img-fluid" alt="Login illustration">
+              </div>
+              <div class="col-md-6">
+                <form id="loginForm" class="bg-white p-4 rounded-4 shadow-sm">
+                  <!-- Email input -->
+                  <div class="form-group mb-3">
+                    <label for="form1Example13" class="font-weight-bold">Email address</label>
+                    <input type="email" id="form1Example13" class="form-control form-control-lg" placeholder="Enter your email" required />
+                  </div>
+                  <!-- Password input -->
+                  <div class="form-group mb-3">
+                    <label for="form1Example23" class="font-weight-bold">Password</label>
+                    <input type="password" id="form1Example23" class="form-control form-control-lg" placeholder="Enter your password" required />
+                  </div>
+                  <!-- Submit button -->
+                  <button type="submit" class="btn btn-primary btn-lg btn-block w-100 mb-3">Sign in</button>
+                  <!-- Create New User button -->
+                  <button type="button" id="createUserBtn" class="btn btn-secondary btn-lg btn-block w-100">Create New User</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content Container with optimized spacing -->
+<div style="margin-top: 60px; padding: 0 15px;">
+  <div class="carousel-container">
+    <!-- Navigation Arrows -->
+    <button class="carousel-nav prev" onclick="prevSlideManual()">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+  <button class="carousel-nav next" onclick="nextSlideManual()">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+  
+  <div class="carousel-slide">
+    <img src="https://rukminim2.flixcart.com/fk-p-flap/480/80/image/37b2af65f418dc92.jpg?q=80" alt="Image 1">
+  </div>
+  <div class="carousel-slide">
+    <img src="https://rukminim2.flixcart.com/fk-p-flap/480/80/image/1338bd4fc60390d8.jpg?q=90" alt="Image 2">
+  </div>
+  <div class="carousel-slide">
+    <img src="https://rukminim2.flixcart.com/fk-p-flap/480/80/image/e8a78ecc184f5eb7.jpg?q=80" alt="Image 3">
+  </div>
+
+  <div class="carousel-pagination">
+    <div class="dot-container">
+      <div class="dot">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
+    <div class="dot-container">
+      <div class="dot">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
+    <div class="dot-container">
+      <div class="dot">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Categories Section with reduced margin -->
+<div class="container-fluid" style="margin-top: 20px;">
+    <div class="categories-section">
+        <h2 class="categories-title">
+            <i class="fas fa-th-large"></i> Categories
+        </h2>
+        <div class="blinkit-category-grid" id="blinkitCategoryGrid">
+            <div class="category-grid-loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading categories...
             </div>
         </div>
     </div>
-</main>
-<th:block>
-    <div th:replace="fragments/footer.html :: footer"></div>
-</th:block>
+</div>
 
-<script th:src="@{/js/home.js}"></script>
-<script th:src="@{/js/product-search.js}"></script>
+<!-- Categories with Subcategories Section with reduced margin -->
+<div class="container-fluid" style="margin: 20px 0; padding: 0 15px;">
+  <div class="row">
+    <div class="col-12">
+      <h3 class="text-center mb-4 font-weight-bold">Shop by Categories & Subcategories</h3>
+      
+      <!-- Categories and Subcategories Container -->
+      <div id="categoriesWithSubcategories">
+        <!-- This will be populated by JavaScript with all categories and their subcategories -->
+        <div class="loading-message text-center py-3">
+          <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+          <p>Loading categories and subcategories...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Cards Carousel with reduced margin -->
+<div id="productCardsCarousel" style="overflow:hidden; width:100%; background:#f8f9fa; padding:15px 0; margin:20px 0; position:relative;">
+  <button id="carouselPrev" class="btn" style="position:absolute;top:50%;left:10px;z-index:2;transform:translateY(-50%);background:white;border:1px solid #ddd;border-radius:50%;width:40px;height:40px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    <i class="fas fa-chevron-left" style="color:#666;"></i>
+  </button>
+  <div id="flashCarouselTrack" style="display:flex; flex-wrap:nowrap; transition:transform 0.5s cubic-bezier(.4,0,.2,1); will-change:transform; padding:0 20px;">
+    
+    <!-- Product Card 1 - Display Only -->
+    <div class="blinkit-card" style="min-width:160px; max-width:160px; margin:0 8px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); position:relative; overflow:hidden; border:1px solid #f0f0f0;">
+      <!-- Discount Badge -->
+      <div style="position:absolute; top:8px; left:8px; background:#ff6b35; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; z-index:1;">
+        25% OFF
+      </div>
+      <!-- Delivery Time Badge -->
+      <div style="position:absolute; top:8px; right:8px; background:#0c7d40; color:white; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:500; z-index:1;">
+        8 MINS
+      </div>
+      
+      <!-- Product Image -->
+      <div style="height:120px; padding:15px; display:flex; align-items:center; justify-content:center; background:#fafafa;">
+        <img src="https://rukminim2.flixcart.com/image/612/612/xif0q/edible-seed/y/g/d/-original-imahauc5pbgzzgwq.jpeg?q=70" 
+             alt="Tata Sampann Chia Seeds" 
+             style="max-width:100%; max-height:100%; object-fit:contain;">
+      </div>
+      
+      <!-- Product Details -->
+      <div style="padding:12px;">
+        <h6 style="font-size:12px; font-weight:500; color:#333; margin:0 0 4px 0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+          Tata Sampann Chia Seeds
+        </h6>
+        <p style="font-size:11px; color:#666; margin:0 0 8px 0;">200 g</p>
+        
+        <!-- Price Section -->
+        <div style="margin-bottom:10px;">
+          <span style="font-size:14px; font-weight:600; color:#000;">₹171</span>
+          <span style="font-size:11px; color:#999; text-decoration:line-through; margin-left:4px;">₹209</span>
+        </div>
+        
+        <!-- View Details Button instead of Add to Cart -->
+        <button class="btn" style="width:100%; background:#007bff; color:white; border:none; border-radius:8px; padding:8px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px;"
+                onclick="viewProductDetails('chia-seeds-001')">
+          VIEW DETAILS
+        </button>
+      </div>
+    </div>
+
+    <!-- Product Card 2 - Display Only -->
+    <div class="blinkit-card" style="min-width:160px; max-width:160px; margin:0 8px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); position:relative; overflow:hidden; border:1px solid #f0f0f0;">
+      <div style="position:absolute; top:8px; left:8px; background:#ff6b35; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; z-index:1;">
+        49% OFF
+      </div>
+      <div style="position:absolute; top:8px; right:8px; background:#0c7d40; color:white; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:500; z-index:1;">
+        8 MINS
+      </div>
+      
+      <div style="height:120px; padding:15px; display:flex; align-items:center; justify-content:center; background:#fafafa;">
+        <img src="https://rukminim2.flixcart.com/image/612/612/xif0q/edible-seed/r/l/t/200-foods-phool-makhana-healthy-snacks-rich-calcium-2-raw-pouch-original-imahcfc2hzhyxhra.jpeg?q=70" 
+             alt="WONDERLAND Foods Phool Makhana" 
+             style="max-width:100%; max-height:100%; object-fit:contain;">
+      </div>
+      
+      <div style="padding:12px;">
+        <h6 style="font-size:12px; font-weight:500; color:#333; margin:0 0 4px 0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+          WONDERLAND Foods Phool Makhana
+        </h6>
+        <p style="font-size:11px; color:#666; margin:0 0 8px 0;">200 g, Pack of 2</p>
+        
+        <div style="margin-bottom:10px;">
+          <span style="font-size:14px; font-weight:600; color:#000;">₹310</span>
+          <span style="font-size:11px; color:#999; text-decoration:line-through; margin-left:4px;">₹698</span>
+        </div>
+        
+        <button class="btn" style="width:100%; background:#007bff; color:white; border:none; border-radius:8px; padding:8px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px;"
+                onclick="viewProductDetails('makhana-002')">
+          VIEW DETAILS
+        </button>
+      </div>
+    </div>
+
+    <!-- Product Card 3 - Display Only -->
+    <div class="blinkit-card" style="min-width:160px; max-width:160px; margin:0 8px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); position:relative; overflow:hidden; border:1px solid #f0f0f0;">
+      <div style="position:absolute; top:8px; left:8px; background:#ff6b35; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; z-index:1;">
+        14% OFF
+      </div>
+      <div style="position:absolute; top:8px; right:8px; background:#0c7d40; color:white; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:500; z-index:1;">
+        8 MINS
+      </div>
+      
+      <div style="height:120px; padding:15px; display:flex; align-items:center; justify-content:center; background:#fafafa;">
+        <img src="https://rukminim2.flixcart.com/image/612/612/xif0q/nut-dry-fruit/y/y/o/200-premium-naturals-californian-almonds-1-pouch-happilo-original-imaha8tya853fmxy.jpeg?q=70" 
+             alt="Happilo Premium Naturals Californian Almonds" 
+             style="max-width:100%; max-height:100%; object-fit:contain;">
+      </div>
+      
+      <div style="padding:12px;">
+        <h6 style="font-size:12px; font-weight:500; color:#333; margin:0 0 4px 0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+          Happilo Premium Naturals Californian Almonds
+        </h6>
+        <p style="font-size:11px; color:#666; margin:0 0 8px 0;">1 x 200 g</p>
+        
+        <div style="margin-bottom:10px;">
+          <span style="font-size:14px; font-weight:600; color:#000;">₹234</span>
+          <span style="font-size:11px; color:#999; text-decoration:line-through; margin-left:4px;">₹275</span>
+        </div>
+        
+        <button class="btn" style="width:100%; background:#007bff; color:white; border:none; border-radius:8px; padding:8px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px;"
+                onclick="viewProductDetails('almonds-003')">
+          VIEW DETAILS
+        </button>
+      </div>
+    </div>
+
+    <!-- Blinkit-style Product Card 4 -->
+    <div class="blinkit-card" style="min-width:160px; max-width:160px; margin:0 8px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); position:relative; overflow:hidden; border:1px solid #f0f0f0;">
+      <!-- Discount Badge -->
+      <div style="position:absolute; top:8px; left:8px; background:#ff6b35; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; z-index:1;">
+        71% OFF
+      </div>
+      <!-- Delivery Time Badge -->
+      <div style="position:absolute; top:8px; right:8px; background:#0c7d40; color:white; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:500; z-index:1;">
+        8 MINS
+      </div>
+      
+      <!-- Product Image -->
+      <div style="height:120px; padding:15px; display:flex; align-items:center; justify-content:center; background:#fafafa;">
+        <img src="https://rukminim2.flixcart.com/image/612/612/xif0q/nut-dry-fruit/c/j/5/500-mix-dry-fruit-panchmeva-500gm-1-mason-jar-farmleaf-original-imahbvfsztmznh4h.jpeg?q=70" 
+             alt="FarmLeaf Mix Dry Fruit Panchmeva" 
+             style="max-width:100%; max-height:100%; object-fit:contain;">
+      </div>
+      
+      <!-- Product Details -->
+      <div style="padding:12px;">
+        <h6 style="font-size:12px; font-weight:500; color:#333; margin:0 0 4px 0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+          FarmLeaf Mix Dry Fruit | Panchmeva | 500gm
+        </h6>
+        <p style="font-size:11px; color:#666; margin:0 0 8px 0;">1 x 500 g</p>
+        
+        <!-- Price Section -->
+        <div style="margin-bottom:10px;">
+          <span style="font-size:14px; font-weight:600; color:#000;">₹230</span>
+          <span style="font-size:11px; color:#999; text-decoration:line-through; margin-left:4px;">₹800</span>
+        </div>
+        
+        <!-- View Details Button instead of Add to Cart -->
+        <button class="btn" style="width:100%; background:#007bff; color:white; border:none; border-radius:8px; padding:8px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px;"
+                onclick="viewProductDetails('panchmeva-004')">
+          VIEW DETAILS
+        </button>
+      </div>
+    </div>
+
+    <!-- Blinkit-style Product Card 5 -->
+    <div class="blinkit-card" style="min-width:160px; max-width:160px; margin:0 8px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); position:relative; overflow:hidden; border:1px solid #f0f0f0;">
+      <!-- Discount Badge -->
+      <div style="position:absolute; top:8px; left:8px; background:#ff6b35; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; z-index:1;">
+        14% OFF
+      </div>
+      <!-- Delivery Time Badge -->
+      <div style="position:absolute; top:8px; right:8px; background:#0c7d40; color:white; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:500; z-index:1;">
+        8 MINS
+      </div>
+      
+      <!-- Product Image -->
+      <div style="height:120px; padding:15px; display:flex; align-items:center; justify-content:center; background:#fafafa;">
+        <img src="https://rukminim2.flixcart.com/image/612/612/xif0q/nut-dry-fruit/z/7/3/250-premium-cashew-nuts-whole-kaju-1-pouch-happilo-original-imaha8tyyqgqgqgq.jpeg?q=70" 
+             alt="Happilo Premium Cashew Nuts" 
+             style="max-width:100%; max-height:100%; object-fit:contain;">
+      </div>
+      
+      <!-- Product Details -->
+      <div style="padding:12px;">
+        <h6 style="font-size:12px; font-weight:500; color:#333; margin:0 0 4px 0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+          Happilo Premium Cashew Nuts
+        </h6>
+        <p style="font-size:11px; color:#666; margin:0 0 8px 0;">250 g</p>
+        
+        <!-- Price Section -->
+        <div style="margin-bottom:10px;">
+          <span style="font-size:14px; font-weight:600; color:#000;">₹299</span>
+          <span style="font-size:11px; color:#999; text-decoration:line-through; margin-left:4px;">₹350</span>
+        </div>
+        
+        <!-- View Details Button instead of Add to Cart -->
+        <button class="btn" style="width:100%; background:#007bff; color:white; border:none; border-radius:8px; padding:8px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px;"
+                onclick="viewProductDetails('cashew-nuts-005')">
+          VIEW DETAILS
+        </button>
+      </div>
+    </div>
+
+    <!-- Additional cards for continuous scroll -->
+    <div class="blinkit-card" style="min-width:160px; max-width:160px; margin:0 8px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); position:relative; overflow:hidden; border:1px solid #f0f0f0;">
+      <div style="position:absolute; top:8px; left:8px; background:#ff6b35; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; z-index:1;">
+        38% OFF
+      </div>
+      <div style="position:absolute; top:8px; right:8px; background:#0c7d40; color:white; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:500; z-index:1;">
+        8 MINS
+      </div>
+      <div style="height:120px; padding:15px; display:flex; align-items:center; justify-content:center; background:#fafafa;">
+        <img src="https://rukminim2.flixcart.com/image/612/612/xif0q/edible-seed/y/g/d/-original-imahauc5pbgzzgwq.jpeg?q=70" 
+             alt="Table White Eggs" 
+             style="max-width:100%; max-height:100%; object-fit:contain;">
+      </div>
+      <div style="padding:12px;">
+        <h6 style="font-size:12px; font-weight:500; color:#333; margin:0 0 4px 0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+          Table White Eggs
+        </h6>
+        <p style="font-size:11px; color:#666; margin:0 0 8px 0;">10 pieces</p>
+        <div style="margin-bottom:10px;">
+          <span style="font-size:14px; font-weight:600; color:#000;">₹85</span>
+          <span style="font-size:11px; color:#999; text-decoration:line-through; margin-left:4px;">₹140</span>
+        </div>
+        <button class="btn" style="width:100%; background:#007bff; color:white; border:none; border-radius:8px; padding:8px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px;"
+                onclick="viewProductDetails('white-eggs-006')">
+          VIEW DETAILS
+        </button>
+      </div>
+    </div>
+
+    <!-- Continue with more cards for seamless loop -->
+    <div class="blinkit-card" style="min-width:160px; max-width:160px; margin:0 8px; background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); position:relative; overflow:hidden; border:1px solid #f0f0f0;">
+      <div style="position:absolute; top:8px; left:8px; background:#ff6b35; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; z-index:1;">
+        26% OFF
+      </div>
+      <div style="position:absolute; top:8px; right:8px; background:#0c7d40; color:white; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:500; z-index:1;">
+        8 MINS
+      </div>
+      <div style="height:120px; padding:15px; display:flex; align-items:center; justify-content:center; background:#fafafa;">
+        <img src="https://rukminim2.flixcart.com/image/612/612/xif0q/nut-dry-fruit/y/y/o/200-premium-naturals-californian-almonds-1-pouch-happilo-original-imaha8tya853fmxy.jpeg?q=70" 
+             alt="Fortune Sugar" 
+             style="max-width:100%; max-height:100%; object-fit:contain;">
+      </div>
+      <div style="padding:12px;">
+        <h6 style="font-size:12px; font-weight:500; color:#333; margin:0 0 4px 0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+          Fortune Sulphurless Sugar
+        </h6>
+        <p style="font-size:11px; color:#666; margin:0 0 8px 0;">1 kg</p>
+        <div style="margin-bottom:10px;">
+          <span style="font-size:14px; font-weight:600; color:#000;">₹55</span>
+          <span style="font-size:11px; color:#999; text-decoration:line-through; margin-left:4px;">₹75</span>
+        </div>
+        <button class="btn" style="width:100%; background:#007bff; color:white; border:none; border-radius:8px; padding:8px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px;"
+                onclick="viewProductDetails('sugar-007')">
+          VIEW DETAILS
+        </button>
+      </div>
+    </div>
+     
+  </div>
+  <button id="carouselNext" class="btn" style="position:absolute;top:50%;right:10px;z-index:2;transform:translateY(-50%);background:white;border:1px solid #ddd;border-radius:50%;width:40px;height:40px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    <i class="fas fa-chevron-right" style="color:#666;"></i>
+  </button>
+</div>
+
+<!-- Payment Interface Section -->
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow rounded-4">
+        <div class="card-header bg-primary text-white text-center font-weight-bold">
+          Pay for Your Order
+        </div>
+        <div class="card-body">
+          <form id="paymentForm">
+            <div class="form-group">
+              <label for="amount">Amount (₹)</label>
+              <input type="number" class="form-control" id="amount" placeholder="Enter amount" required min="1">
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" class="form-control" id="phone" placeholder="Enter PhonePe registered number" required pattern="[0-9]{10}">
+            </div>
+            <button type="submit" class="btn btn-success btn-block">Proceed to Pay</button>
+          </form>
+          <div id="paymentStatus" class="mt-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- External JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="/js/home.js"></script>
+<script src="/js/categories-with-subcategories.js"></script>
+
+<!-- Make categories data available to JavaScript -->
+<script th:if="${categories != null}">
+window.categoriesData = /*[[${categories}]]*/ [];
+</script>
+
+<!-- Category Grid JavaScript ONLY -->
+<script>
+// Global variables for Blinkit grid
+let allCategories = [];
+
+// Load categories with subcategories on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Home page DOM loaded, starting Blinkit category grid load...');
+    
+    // Check if the grid element exists
+    const gridElement = document.getElementById('blinkitCategoryGrid');
+    if (!gridElement) {
+        console.error('Blinkit category grid element not found on home page!');
+        return;
+    }
+    
+    // Add a small delay to ensure everything is ready
+    setTimeout(() => {
+        loadCategoriesForBlinkitGrid();
+    }, 500);
+});
+
+// Load all categories with their subcategories for Blinkit grid
+async function loadCategoriesForBlinkitGrid() {
+    console.log('Starting to load categories for Blinkit grid...');
+    
+    const endpoints = [
+        '/api/categories/with-subcategories',
+        window.location.origin + '/api/categories/with-subcategories'
+    ];
+    
+    for (let endpoint of endpoints) {
+        try {
+            console.log('Home page trying endpoint:', endpoint);
+            const response = await fetch(endpoint);
+            console.log('Home page response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.log('Home page error response text:', errorText);
+                throw new Error('HTTP error! status: ' + response.status + ', message: ' + errorText);
+            }
+            
+            const data = await response.json();
+            console.log('Home page received data:', data);
+            allCategories = data;
+            
+            if (!data || data.length === 0) {
+                console.log('No categories found on home page');
+                document.getElementById('blinkitCategoryGrid').innerHTML = 
+                    '<div class="category-grid-loading">No categories available</div>';
+                return;
+            }
+            
+            renderBlinkitCategoryGrid();
+            return; // Success, exit the loop
+        } catch (error) {
+            console.error('Home page error with endpoint', endpoint, ':', error);
+            if (endpoint === endpoints[endpoints.length - 1]) {
+                // Last endpoint failed - show detailed error
+                document.getElementById('blinkitCategoryGrid').innerHTML = 
+                    '<div class="category-grid-loading">' +
+                    '<i class="fas fa-exclamation-triangle"></i> Error loading categories: ' + error.message + 
+                    '<br><button onclick="loadCategoriesForBlinkitGrid()" class="btn btn-sm btn-primary mt-2">Retry</button>' +
+                    '</div>';
+            }
+        }
+    }
+}
+
+// Render Blinkit-style Category Grid
+function renderBlinkitCategoryGrid() {
+    console.log('Rendering Blinkit-style category grid with', allCategories.length, 'categories');
+    
+    if (!allCategories || allCategories.length === 0) {
+        document.getElementById('blinkitCategoryGrid').innerHTML = 
+            '<div class="category-grid-loading">No categories available</div>';
+        return;
+    }
+    
+    try {
+        const gridHtml = allCategories.map((category, index) => {
+            console.log('Creating grid card for category:', category.name);
+            
+            // Count subcategories
+            const subcategoryCount = category.subcategories ? category.subcategories.length : 0;
+            const countText = subcategoryCount > 0 ? subcategoryCount + ' items' : 'View all';
+            
+            // Use the standard Blinkit image for all categories
+            const imageUrl = 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=360/app/images/category/cms_images/icon/1487_1679466558536.png';
+            
+            return '<div class="blinkit-category-card" data-category-id="' + category.id + '" data-category-name="' + category.name.replace(/"/g, '&quot;') + '">' +
+                    '<img src="' + imageUrl + '" ' +
+                         'alt="' + category.name + '" ' +
+                         'class="category-card-image" ' +
+                         'onerror="this.style.background=\'#f0f0f0\'; this.style.color=\'#999\'; this.innerHTML=\'<i class=\\\'fas fa-image\\\'></i>\'">' +
+                    '<h3 class="category-card-name">' + category.name + '</h3>' +
+                    '<div class="category-card-count">' + countText + '</div>' +
+                '</div>';
+        }).join('');
+        
+        console.log('Setting Blinkit category grid HTML');
+        document.getElementById('blinkitCategoryGrid').innerHTML = gridHtml;
+        console.log('Blinkit category grid rendered successfully');
+        
+        // Add event listeners to category cards using event delegation
+        setupCategoryCardListeners();
+        
+        // Add animation to cards
+        setTimeout(() => {
+            const cards = document.querySelectorAll('.blinkit-category-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px) scale(0.95)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0) scale(1)';
+                }, index * 50);
+            });
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error rendering Blinkit category grid:', error);
+        document.getElementById('blinkitCategoryGrid').innerHTML = 
+            '<div class="category-grid-loading"><i class="fas fa-exclamation-triangle"></i> Error loading categories: ' + error.message + '</div>';
+    }
+}
+
+// Setup event listeners for category cards
+function setupCategoryCardListeners() {
+    const categoryGrid = document.getElementById('blinkitCategoryGrid');
+    if (!categoryGrid) return;
+    
+    // Remove any existing listeners
+    categoryGrid.removeEventListener('click', handleCategoryCardClick);
+    
+    // Add event delegation listener
+    categoryGrid.addEventListener('click', handleCategoryCardClick);
+    
+    console.log('Category card event listeners setup complete');
+}
+
+// Handle category card clicks
+function handleCategoryCardClick(event) {
+    const categoryCard = event.target.closest('.blinkit-category-card');
+    if (!categoryCard) return;
+    
+    const categoryId = categoryCard.getAttribute('data-category-id');
+    const categoryName = categoryCard.getAttribute('data-category-name');
+    
+    if (categoryId && categoryName) {
+        event.currentTarget = categoryCard; // Set for animation in navigateToCategory
+        navigateToCategory(categoryId, categoryName);
+    }
+}
+
+// Navigate to category from grid
+function navigateToCategory(categoryId, categoryName) {
+    console.log('Navigating to category:', categoryName, 'with ID:', categoryId);
+    
+    // Add click animation
+    const clickedCard = event.currentTarget;
+    clickedCard.style.transform = 'scale(0.95)';
+    
+    setTimeout(() => {
+        // Navigate to new category shopping page
+        window.location.href = '/categories/shopping?categoryId=' + categoryId + '&categoryName=' + encodeURIComponent(categoryName);
+    }, 150);
+}
+
+// View product details function - replaces cart functionality
+function viewProductDetails(productId) {
+    console.log('Viewing product details for:', productId);
+    // Redirect to product details page
+    window.location.href = `/products/${productId}`;
+}
+</script>
+
 </body>
 </html>

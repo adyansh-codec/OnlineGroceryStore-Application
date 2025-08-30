@@ -1,190 +1,195 @@
 package org.softuni.onlinegrocery.service;
 
 import org.modelmapper.ModelMapper;
-import org.softuni.onlinegrocery.domain.entities.Product;
-import org.softuni.onlinegrocery.domain.models.service.CategoryServiceModel;
-import org.softuni.onlinegrocery.domain.models.service.ProductServiceModel;
-import org.softuni.onlinegrocery.util.error.ProductNameAlreadyExistsException;
-import org.softuni.onlinegrocery.util.error.ProductNotFoundException;
-import org.softuni.onlinegrocery.repository.OfferRepository;
-import org.softuni.onlinegrocery.repository.ProductRepository;
-import org.softuni.onlinegrocery.validation.ProductValidationService;
+import org.softuni.onlinegrocery.domain.entities.ProductNew;
+import org.softuni.onlinegrocery.domain.entities.Subcategory;
+import org.softuni.onlinegrocery.domain.models.service.ProductNewServiceModel;
+import org.softuni.onlinegrocery.repository.ProductNewRepository;
+import org.softuni.onlinegrocery.repository.SubcategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.softuni.onlinegrocery.util.constants.AppConstants.OFFER_SCHEDULED_DISCOUNT;
-import static org.softuni.onlinegrocery.util.constants.ExceptionMessages.*;
-
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepository productRepository;
-    private final OfferRepository offerRepository;
-    private final CategoryService categoryService;
-    private final CloudinaryService cloudinaryService;
-    private final ProductValidationService productValidation;
+    private final ProductNewRepository productNewRepository;
+    private final SubcategoryRepository subcategoryRepository;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public ProductServiceImpl(
-            ProductRepository productRepository,
-            OfferRepository offerRepository, CategoryService categoryService,
-            CloudinaryService cloudinaryService, ProductValidationService productValidation,
-            ModelMapper modelMapper) {
-        this.productRepository = productRepository;
-        this.offerRepository = offerRepository;
-        this.categoryService = categoryService;
-        this.cloudinaryService = cloudinaryService;
-        this.productValidation = productValidation;
+    public ProductServiceImpl(ProductNewRepository productNewRepository,
+                             SubcategoryRepository subcategoryRepository,
+                             ModelMapper modelMapper) {
+        this.productNewRepository = productNewRepository;
+        this.subcategoryRepository = subcategoryRepository;
         this.modelMapper = modelMapper;
     }
 
     @Override
-    public ProductServiceModel createProduct(ProductServiceModel productServiceModel,
-                                             MultipartFile image) throws IOException {
-        if(!productValidation.isValid(productServiceModel) || image.isEmpty()) {
-            throw new IllegalArgumentException(INVALID_PRODUCT_EX_MSG);
+    public ProductNewServiceModel save(ProductNewServiceModel productNewServiceModel) {
+        ProductNew productNew = modelMapper.map(productNewServiceModel, ProductNew.class);
+        
+        // Set the subcategory reference
+        if (productNewServiceModel.getSubcategoryId() != null) {
+            Subcategory subcategory = subcategoryRepository.findById(productNewServiceModel.getSubcategoryId()).orElse(null);
+            productNew.setSubcategory(subcategory);
         }
-        if (productRepository.findByName(productServiceModel.getName())
-                .orElse(null) != null) {
-            throw new ProductNameAlreadyExistsException(PRODUCT_NAME_EXIST_EX_MSG);
+        
+        ProductNew savedProduct = productNewRepository.save(productNew);
+        ProductNewServiceModel result = modelMapper.map(savedProduct, ProductNewServiceModel.class);
+        
+        // Set additional fields
+        if (savedProduct.getSubcategory() != null) {
+            result.setSubcategoryId(savedProduct.getSubcategory().getId());
+            result.setSubcategoryName(savedProduct.getSubcategory().getName());
+            if (savedProduct.getSubcategory().getCategoryNew() != null) {
+                result.setCategoryNewId(savedProduct.getSubcategory().getCategoryNew().getId());
+                result.setCategoryNewName(savedProduct.getSubcategory().getCategoryNew().getName());
+            }
         }
-        Product product = this.modelMapper.map(productServiceModel, Product.class);
-
-        product.setImageUrl(
-                this.cloudinaryService.uploadImage(image)
-        );
-        product = this.productRepository.saveAndFlush(product);
-        if (product == null){
-            throw new IllegalArgumentException(INVALID_PRODUCT_EX_MSG);
-        }
-        return this.modelMapper.map(product, ProductServiceModel.class);
+        
+        return result;
     }
 
     @Override
-    public List<ProductServiceModel> findAllProducts() {
-        List<Product> products = this.productRepository.findAll();
-
-        return products.stream()
-                .map(p -> this.modelMapper.map(p, ProductServiceModel.class))
-                .collect(Collectors.toList());
+    public ProductNewServiceModel findById(String id) {
+        ProductNew productNew = productNewRepository.findById(id).orElse(null);
+        if (productNew != null) {
+            ProductNewServiceModel result = modelMapper.map(productNew, ProductNewServiceModel.class);
+            if (productNew.getSubcategory() != null) {
+                result.setSubcategoryId(productNew.getSubcategory().getId());
+                result.setSubcategoryName(productNew.getSubcategory().getName());
+                if (productNew.getSubcategory().getCategoryNew() != null) {
+                    result.setCategoryNewId(productNew.getSubcategory().getCategoryNew().getId());
+                    result.setCategoryNewName(productNew.getSubcategory().getCategoryNew().getName());
+                }
+            }
+            return result;
+        }
+        return null;
     }
 
     @Override
-    public ProductServiceModel findProductById(String id) {
-        return this.productRepository.findById(id)
-                .map(p -> {
-                    ProductServiceModel productServiceModel = this.modelMapper.map(p, ProductServiceModel.class);
-                    this.offerRepository.findByProduct_Id(productServiceModel.getId())
-                            .ifPresent(o -> productServiceModel.setDiscountedPrice(o.getPrice()));
-
-                    return productServiceModel;
-                }).orElseThrow(() -> new ProductNotFoundException(PRODUCT_ID_DOESNT_EXIST_EX_MSG));
-    }
-
-    @Override
-    public ProductServiceModel editProduct(String id, ProductServiceModel productServiceModel,
-                                           boolean isNewImageUploaded, MultipartFile image) throws IOException {
-        Product product = this.productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(PRODUCT_ID_DOESNT_EXIST_EX_MSG));
-        if(!productValidation.isValid(productServiceModel)) {
-            throw new IllegalArgumentException(INVALID_PRODUCT_EX_MSG);
-        }
-        productServiceModel.setId(id);
-        Product update = modelMapper.map(productServiceModel, Product.class);
-
-        if (product == null || update == null){
-            throw new ProductNotFoundException(PRODUCT_ID_DOESNT_EXIST_EX_MSG);
-        }
-
-        if (isNewImageUploaded){
-            update.setImageUrl(
-                    this.cloudinaryService.uploadImage(image)
-            );
-        }else {
-            update.setImageUrl(product.getImageUrl());
-        }
-
-        this.offerRepository.findByProduct_Id(product.getId())
-                .ifPresent((o) -> {
-                    o.setPrice(product.getPrice().multiply(new BigDecimal(OFFER_SCHEDULED_DISCOUNT)));
-
-                    this.offerRepository.save(o);
-                });
-
-        return this.modelMapper.map(this.productRepository.saveAndFlush(update), ProductServiceModel.class);
-    }
-
-    @Override
-    public void deleteProduct(String id) {
-        Product product = this.productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(PRODUCT_ID_DOESNT_EXIST_EX_MSG));
-        product.setDeleted(true);
-
-        this.productRepository.save(product);
-    }
-
-    @Override
-    public List<ProductServiceModel> findAllByCategory(String category) {
-        List<String> categories = this.categoryService.findAllCategories()
-                .stream().map(CategoryServiceModel::getName).collect(Collectors.toList());
-        if (!categories.contains(category)){
-            throw new SecurityException(PAGE_NOT_FOUND_EX_MSG);
-        }
-
-        return this.productRepository.findAll()
+    public List<ProductNewServiceModel> findBySubcategoryId(String subcategoryId) {
+        return productNewRepository.findBySubcategoryIdAndIsActiveTrueOrderByName(subcategoryId)
                 .stream()
-                .filter(product -> product.getCategories()
-                        .stream().anyMatch(categoryStream -> categoryStream.getName().equals(category)))
-                .map(product -> this.modelMapper.map(product, ProductServiceModel.class))
-                .collect(Collectors.toList());
-    }
-
-
-    @Override
-    public List<ProductServiceModel> findAllFilteredProducts() {
-        return findAllProducts()
-                .stream()
-                .filter(p -> !p.isDeleted())
-                .filter(p -> p.getCategories().stream().anyMatch(c -> !c.isDeleted()))
-                .map(p -> {
-                    ProductServiceModel productServiceModel = modelMapper.map(p, ProductServiceModel.class);
-                    offerRepository.findByProduct_Id(productServiceModel.getId())
-                            .ifPresent(o -> productServiceModel.setDiscountedPrice(o.getPrice()));
-
-                    return productServiceModel;
-                })
+                .map(this::mapToServiceModel)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ProductServiceModel> findAllByCategoryFilteredProducts(String category) {
-        return findAllByCategory(category)
+    public List<ProductNewServiceModel> findByCategoryNewId(String categoryId) {
+        return productNewRepository.findByCategoryNewIdAndIsActiveTrueOrderByName(categoryId)
                 .stream()
-                .filter(p -> !p.isDeleted())
-                .filter(p -> p.getCategories().stream().anyMatch(c -> !c.isDeleted()))
-                .map(p -> {
-                    ProductServiceModel productServiceModel = modelMapper.map(p, ProductServiceModel.class);
-                    offerRepository.findByProduct_Id(productServiceModel.getId())
-                            .ifPresent(o -> productServiceModel.setDiscountedPrice(o.getPrice()));
-
-                    return productServiceModel;
-                })
+                .map(this::mapToServiceModel)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ProductServiceModel> findProductsByPartOfName(String name) {
-        return findAllFilteredProducts()
+    public List<ProductNewServiceModel> findAll() {
+        return productNewRepository.findByIsActiveTrueOrderByName()
                 .stream()
-                .filter(p->p.getName().toLowerCase().contains(name.toLowerCase()))
-                .map(p -> this.modelMapper.map(p, ProductServiceModel.class))
+                .map(this::mapToServiceModel)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductNewServiceModel> findByNameContaining(String name) {
+        return productNewRepository.findByNameContainingAndIsActiveTrueOrderByName(name)
+                .stream()
+                .map(this::mapToServiceModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductNewServiceModel> findByBrand(String brand) {
+        return productNewRepository.findByBrandAndIsActiveTrueOrderByName(brand)
+                .stream()
+                .map(this::mapToServiceModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductNewServiceModel> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice) {
+        return productNewRepository.findByPriceBetweenAndIsActiveTrueOrderByPrice(minPrice, maxPrice)
+                .stream()
+                .map(this::mapToServiceModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductNewServiceModel> findInStock() {
+        return productNewRepository.findAvailableProductsOrderByName()
+                .stream()
+                .map(this::mapToServiceModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ProductNewServiceModel update(String id, ProductNewServiceModel productNewServiceModel) {
+        ProductNew existingProduct = productNewRepository.findById(id).orElse(null);
+        if (existingProduct != null) {
+            // Update fields
+            existingProduct.setName(productNewServiceModel.getName());
+            existingProduct.setDescription(productNewServiceModel.getDescription());
+            existingProduct.setPrice(productNewServiceModel.getPrice());
+            existingProduct.setImageUrl(productNewServiceModel.getImageUrl());
+            existingProduct.setQuantity(productNewServiceModel.getQuantity());
+            existingProduct.setBrand(productNewServiceModel.getBrand());
+            existingProduct.setUnit(productNewServiceModel.getUnit());
+            
+            // Update subcategory if provided
+            if (productNewServiceModel.getSubcategoryId() != null) {
+                Subcategory subcategory = subcategoryRepository.findById(productNewServiceModel.getSubcategoryId()).orElse(null);
+                existingProduct.setSubcategory(subcategory);
+            }
+            
+            ProductNew savedProduct = productNewRepository.save(existingProduct);
+            return mapToServiceModel(savedProduct);
+        }
+        return null;
+    }
+
+    @Override
+    public void delete(String id) {
+        ProductNew productNew = productNewRepository.findById(id).orElse(null);
+        if (productNew != null) {
+            productNewRepository.delete(productNew);
+        }
+    }
+
+    @Override
+    public void activate(String id) {
+        ProductNew productNew = productNewRepository.findById(id).orElse(null);
+        if (productNew != null) {
+            productNew.setIsActive(true);
+            productNewRepository.save(productNew);
+        }
+    }
+
+    @Override
+    public void deactivate(String id) {
+        ProductNew productNew = productNewRepository.findById(id).orElse(null);
+        if (productNew != null) {
+            productNew.setIsActive(false);
+            productNewRepository.save(productNew);
+        }
+    }
+
+    private ProductNewServiceModel mapToServiceModel(ProductNew productNew) {
+        ProductNewServiceModel result = modelMapper.map(productNew, ProductNewServiceModel.class);
+        if (productNew.getSubcategory() != null) {
+            result.setSubcategoryId(productNew.getSubcategory().getId());
+            result.setSubcategoryName(productNew.getSubcategory().getName());
+            if (productNew.getSubcategory().getCategoryNew() != null) {
+                result.setCategoryNewId(productNew.getSubcategory().getCategoryNew().getId());
+                result.setCategoryNewName(productNew.getSubcategory().getCategoryNew().getName());
+            }
+        }
+        return result;
     }
 }

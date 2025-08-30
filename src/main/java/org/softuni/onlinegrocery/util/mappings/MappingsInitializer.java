@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MappingsInitializer {
@@ -28,7 +29,7 @@ public class MappingsInitializer {
 
         scanner.addIncludeFilter(new AssignableTypeFilter(IHaveCustomMappings.class));
 
-        var candidates = scanner.findCandidateComponents(MappingsInitializer.ROOT_PACKAGE_NAME);
+        Set<BeanDefinition> candidates = scanner.findCandidateComponents(MappingsInitializer.ROOT_PACKAGE_NAME);
 
         return candidates
                 .stream()
@@ -51,7 +52,7 @@ public class MappingsInitializer {
     private static void invokeMethodFromClass(Class<?> klass, String methodName, Object... params) {
         try {
             Method method = klass.getDeclaredMethod(methodName, ModelMapper.class);
-            var obj = klass.newInstance();
+            Object obj = klass.getDeclaredConstructor().newInstance();
             method.invoke(obj, params);
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
             e.printStackTrace();

@@ -18,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -69,7 +70,7 @@ public class OrdersControllerTests {
     @Test
     @WithMockUser
     public void getCustomerOrders_whenAllOrdersAreForCustomer_orders() {
-        orders.addAll(List.of(
+        orders.addAll(Arrays.asList(
                 new Order()
         ));
 
@@ -87,7 +88,7 @@ public class OrdersControllerTests {
     @Test
     @WithMockUser
     public void getCustomerOrders_whenNotAllOrdersAreForCustomer_orders() {
-        orders.addAll(List.of(
+        orders.addAll(Arrays.asList(
                 new Order()
         ));
 

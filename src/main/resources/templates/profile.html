@@ -2,11 +2,17 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 
-<th:block>
-    <div th:replace="fragments/head.html :: head"></div>
-</th:block>
+<head>
+    <th:block th:replace="fragments/head.html :: head"></th:block>
+    
+    <!-- Include Category Shopping Menu Styles -->
+    <th:block th:include="fragments/category-shopping-menu :: category-shopping-styles"></th:block>
+</head>
 
 <body>
+<!-- Include Category Shopping Menu -->
+<th:block th:include="fragments/category-shopping-menu :: category-shopping-menu"></th:block>
+
 <th:block>
     <div th:replace="fragments/header.html :: header"></div>
 </th:block>
@@ -83,6 +89,9 @@
 <th:block>
     <div th:replace="fragments/footer.html :: footer"></div>
 </th:block>
+
+<!-- Include Category Shopping Menu Scripts -->
+<th:block th:include="fragments/category-shopping-menu :: category-shopping-scripts"></th:block>
 
 </body>
 </html>

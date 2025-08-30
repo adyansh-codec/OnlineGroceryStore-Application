@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Verify OTP - Grocery Store</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .otp-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+        }
+        .otp-header i {
+            font-size: 3rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+        .otp-input {
+            font-size: 1.5rem;
+            text-align: center;
+            letter-spacing: 0.5rem;
+            font-weight: 600;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .otp-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-verify {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            padding: 0.75rem;
+            font-weight: 600;
+        }
+        .btn-verify:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-resend {
+            background: none;
+            border: 2px solid #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .btn-resend:hover {
+            background: #667eea;
+            color: white;
+        }
+        .timer {
+            font-size: 1.1rem;
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .contact-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="otp-card">
+                    <div class="otp-header">
+                        <i class="fas fa-lock"></i>
+                        <h3>Verify OTP</h3>
+                        <p class="text-muted">Enter the verification code sent to:</p>
+                    </div>
+
+                    <div class="contact-info">
+                        <div th:if="${phoneNumber}" class="mb-2">
+                            <i class="fas fa-sms text-primary"></i>
+                            <strong th:text="${phoneNumber}">Phone Number</strong>
+                        </div>
+                        <div th:if="${email}" class="mb-2">
+                            <i class="fas fa-envelope text-primary"></i>
+                            <strong th:text="${email}">Email Address</strong>
+                        </div>
+                    </div>
+
+                    <div id="alertContainer"></div>
+
+                    <form id="verifyOtpForm">
+                        <div class="form-group">
+                            <input type="text" class="form-control otp-input" id="otpCode" 
+                                   placeholder="000000" maxlength="6" pattern="[0-9]{6}" required
+                                   autocomplete="one-time-code">
+                            <small class="form-text text-muted">
+                                Enter the 6-digit code
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-verify btn-block text-white mb-3">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            <i class="fas fa-check"></i> Verify OTP
+                        </button>
+                    </form>
+
+                    <div class="resend-section">
+                        <p class="mb-2">Didn't receive the code?</p>
+                        <button id="resendBtn" class="btn btn-resend mb-2" disabled>
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            <i class="fas fa-redo"></i> Resend OTP
+                        </button>
+                        <div id="timer" class="timer mb-3">
+                            You can resend in <span id="countdown">60</span> seconds
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="/otp/send" class="text-muted">
+                            <i class="fas fa-arrow-left"></i> Change Phone/Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Setup CSRF token for AJAX requests
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+        $(document).ajaxSend(function(e, xhr, options) {
+            xhr.setRequestHeader(header, token);
+        });
+
+        let countdownTimer;
+        let timeLeft = 60;
+
+        function showAlert(message, type = 'info') {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            `;
+            $('#alertContainer').html(alertHtml);
+        }
+
+        function setLoading(elementId, loading) {
+            const element = document.getElementById(elementId);
+            const button = element.tagName === 'FORM' ? element.querySelector('button[type="submit"]') : element;
+            const spinner = button.querySelector('.spinner-border');
+            
+            if (loading) {
+                button.disabled = true;
+                spinner.classList.remove('d-none');
+            } else {
+                button.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        }
+
+        function startCountdown() {
+            const resendBtn = document.getElementById('resendBtn');
+            const countdown = document.getElementById('countdown');
+            const timer = document.getElementById('timer');
+            
+            resendBtn.disabled = true;
+            timeLeft = 60;
+            
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                countdown.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    resendBtn.disabled = false;
+                    timer.style.display = 'none';
+                }
+            }, 1000);
+        }
+
+        // Auto-format OTP input
+        $('#otpCode').on('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length === 6) {
+                $(this).addClass('is-valid');
+            } else {
+                $(this).removeClass('is-valid');
+            }
+        });
+
+        // Verify OTP Form
+        $('#verifyOtpForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const otpCode = $('#otpCode').val();
+            
+            if (!otpCode || otpCode.length !== 6) {
+                showAlert('Please enter a valid 6-digit OTP code', 'warning');
+                return;
+            }
+
+            setLoading('verifyOtpForm', true);
+
+            $.post('/otp/verify', {
+                otpCode: otpCode
+            }).done(function(response) {
+                if (response.success) {
+                    showAlert(response.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/home';
+                    }, 2000);
+                } else {
+                    showAlert(response.message, 'danger');
+                    $('#otpCode').addClass('is-invalid').focus();
+                }
+            }).fail(function() {
+                showAlert('Error verifying OTP. Please try again.', 'danger');
+            }).always(function() {
+                setLoading('verifyOtpForm', false);
+            });
+        });
+
+        // Resend OTP
+        $('#resendBtn').on('click', function() {
+            setLoading('resendBtn', true);
+
+            $.post('/otp/resend').done(function(response) {
+                if (response.success) {
+                    showAlert(response.message, 'success');
+                    $('#timer').show();
+                    startCountdown();
+                } else {
+                    showAlert(response.message, 'danger');
+                }
+            }).fail(function() {
+                showAlert('Error resending OTP. Please try again.', 'danger');
+            }).always(function() {
+                setLoading('resendBtn', false);
+            });
+        });
+
+        // Start countdown on page load
+        $(document).ready(function() {
+            startCountdown();
+            
+            // Focus on OTP input
+            $('#otpCode').focus();
+        });
+
+        // Handle paste event for OTP
+        $('#otpCode').on('paste', function(e) {
+            setTimeout(() => {
+                const value = $(this).val();
+                if (value.length === 6 && /^\d{6}$/.test(value)) {
+                    $(this).addClass('is-valid');
+                    $('#verifyOtpForm').submit();
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

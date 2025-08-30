@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+<th:block th:fragment="category-shopping-menu">
+    <!-- Modern Category Navigation Bar (Based on categorywiseshopping.html) -->
+    <div class="category-menu-bar">
+        <div class="category-menu-container">
+            <!-- Brand Section -->
+            <div class="brand-section">
+                <th:block sec:authorize="isAnonymous()">
+                    <a class="navbar-brand modern-brand" th:href="@{/}">
+                        <i class="fas fa-store"></i>
+                        Online Grocery Store
+                    </a>
+                </th:block>
+                <th:block sec:authorize="isAuthenticated()">
+                    <a class="navbar-brand modern-brand" th:href="@{/home}">
+                        <i class="fas fa-store"></i>
+                        Grocery
+                    </a>
+                </th:block>
+            </div>
+            
+            <!-- Category Navigation Menu -->
+            <ul class="category-menu" id="categoryMenu">
+                <li class="loading-menu">
+                    <i class="fas fa-spinner fa-spin"></i> Loading categories...
+                </li>
+            </ul>
+            
+            <!-- Right Side Navigation -->
+            <div class="navbar-right">
+                <ul class="category-menu right-menu">
+                    <!--isAnonymous-->
+                    <th:block sec:authorize="isAnonymous()">
+                        <li class="category-menu-item">
+                            <a class="category-menu-link" th:href="@{/login}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="category-menu-item">
+                            <a class="category-menu-link" th:href="@{/register}">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </li>
+                    </th:block>
+
+                    <!--isAuthenticated-->
+                    <th:block sec:authorize="isAuthenticated()">
+                        <th:block sec:authorize="hasRole('ROLE_ADMIN')">
+                            <li class="category-menu-item">
+                                <a class="category-menu-link" href="#" id="navbarDropdownAdmin">
+                                    <i class="fas fa-tools"></i> Admin Tools
+                                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                                </a>
+                                <div class="mega-dropdown admin-dropdown">
+                                    <div class="mega-dropdown-content">
+                                        <div class="dropdown-section">
+                                            <div class="subcategory-grid">
+                                                <div class="subcategory-column">
+                                                    <ul class="subcategory-list">
+                                                        <li class="subcategory-item">
+                                                            <a class="subcategory-link" th:href="@{/products/add}">
+                                                                <i class="fas fa-plus"></i> Add Product
+                                                            </a>
+                                                        </li>
+                                                        <li class="subcategory-item">
+                                                            <a class="subcategory-link" th:href="@{/products/all}">
+                                                                <i class="fas fa-list"></i> All Products
+                                                            </a>
+                                                        </li>
+                                                        <li class="subcategory-item">
+                                                            <a class="subcategory-link" th:href="@{/categories/add}">
+                                                                <i class="fas fa-plus"></i> Add Category
+                                                            </a>
+                                                        </li>
+                                                        <li class="subcategory-item">
+                                                            <a class="subcategory-link" th:href="@{/categories/all}">
+                                                                <i class="fas fa-list"></i> All Categories
+                                                            </a>
+                                                        </li>
+                                                        <li class="subcategory-item">
+                                                            <a class="subcategory-link" th:href="@{/order/all}">
+                                                                <i class="fas fa-shopping-cart"></i> Manage Orders
+                                                            </a>
+                                                        </li>
+                                                        <li class="subcategory-item">
+                                                            <a class="subcategory-link" th:href="@{/receipts/all}">
+                                                                <i class="fas fa-file-invoice"></i> Manage Receipts
+                                                            </a>
+                                                        </li>
+                                                        <li class="subcategory-item">
+                                                            <a class="subcategory-link" th:href="@{/admin/users}">
+                                                                <i class="fas fa-users"></i> Users List
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </th:block>
+
+                        <li class="category-menu-item">
+                            <a class="category-menu-link" th:href="@{/order/my}">
+                                <i class="fas fa-truck"></i> My Orders
+                            </a>
+                        </li>
+                        
+                        <li class="category-menu-item">
+                            <a class="category-menu-link" th:href="@{/receipts/my}">
+                                <i class="fas fa-file-invoice-dollar"></i> My Receipts
+                            </a>
+                        </li>
+                        
+                        <li class="category-menu-item">
+                            <a class="category-menu-link" href="#" id="cartDropdown">
+                                <i class="fas fa-shopping-cart"></i> Cart
+                                <i class="fas fa-chevron-down dropdown-arrow"></i>
+                            </a>
+                            <div class="mega-dropdown cart-dropdown">
+                                <div class="mega-dropdown-content">
+                                    <div class="dropdown-section">
+                                        <div class="cart-items-preview">
+                                            <th:block th:each="item : ${#session.getAttribute('shopping-cart')}" th:object="${item}">
+                                                <div class="cart-preview-item" th:text="|*{product.product.name} x *{quantity}|"></div>
+                                            </th:block>
+                                            <div class="cart-actions">
+                                                <a th:href="@{/cart/details}" class="cart-view-btn">
+                                                    <i class="fas fa-shopping-cart"></i> View Full Cart
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        <li class="category-menu-item">
+                            <a class="category-menu-link" href="#" id="navbarDropdownProfile">
+                                <i class="fas fa-user"></i>
+                                <span th:text="${#authentication.getName()}"></span>
+                                <i class="fas fa-chevron-down dropdown-arrow"></i>
+                            </a>
+                            <div class="mega-dropdown profile-dropdown">
+                                <div class="mega-dropdown-content">
+                                    <div class="dropdown-section">
+                                        <div class="subcategory-grid">
+                                            <div class="subcategory-column">
+                                                <ul class="subcategory-list">
+                                                    <li class="subcategory-item">
+                                                        <a class="subcategory-link" 
+                                                           th:href="@{/user/profile/{username}(username=${#authentication.getPrincipal().getUsername()})}">
+                                                            <i class="fas fa-address-card"></i> Profile
+                                                        </a>
+                                                    </li>
+                                                    <li class="subcategory-item">
+                                                        <form th:action="@{/logout}" th:method="post" class="logout-form">
+                                                            <button class="subcategory-link logout-btn" type="submit">
+                                                                <i class="fas fa-sign-out-alt"></i> Logout
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </th:block>
+                </ul>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:fragment="category-shopping-styles">
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Modern Category Navigation (Based on categorywiseshopping.html) */
+        .category-menu-bar {
+            background: #ffffff;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky;
+            top: 0;
+            z-index: 10000;
+            margin-bottom: 0;
+            padding: 0;
+            overflow: visible;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-menu-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            min-height: 70px;
+        }
+        
+        .category-menu-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .brand-section {
+            flex-shrink: 0;
+            margin-right: 40px;
+        }
+
+        .modern-brand {
+            color: #0c831f !important;
+            text-decoration: none !important;
+            font-weight: 700;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modern-brand:hover {
+            color: #0a6e1a !important;
+            text-decoration: none !important;
+        }
+
+        .modern-brand i {
+            font-size: 28px;
+        }
+        
+        .category-menu {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: nowrap;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            min-height: 60px;
+            min-width: max-content;
+            gap: 4px;
+        }
+
+        .right-menu {
+            justify-content: flex-end;
+        }
+
+        .navbar-right {
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        
+        .category-menu-item {
+            position: relative;
+            margin: 0;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: auto;
+        }
+        
+        .category-menu-item:hover {
+            z-index: 10002;
+        }
+        
+        .category-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 18px 12px;
+            color: #212121;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            position: relative;
+            border-radius: 6px;
+            white-space: nowrap;
+            min-width: fit-content;
+            gap: 8px;
+        }
+        
+        .category-menu-link:hover {
+            color: #333 !important;
+            text-decoration: none;
+            background: #f8f9fa;
+        }
+        
+        .category-menu-item.active .category-menu-link {
+            color: #333;
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .dropdown-arrow {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .category-menu-item:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .loading-menu {
+            display: flex;
+            align-items: center;
+            padding: 18px 16px;
+            color: #666;
+            font-size: 14px;
+            gap: 8px;
+        }
+
+        .loading-menu i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Modern Mega Dropdown */
+        .mega-dropdown {
+            position: absolute;
+            top: 100%;
+            left: -20px;
+            right: -20px;
+            background: white;
+            border: 1px solid #f0f0f0;
+            border-top: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            z-index: 10001;
+            
+            display: none !important;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+            
+            min-height: 200px;
+            max-height: 450px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border-radius: 0 0 12px 12px;
+            width: auto;
+            min-width: 600px;
+        }
+        
+        .category-menu-item:hover .mega-dropdown {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+            pointer-events: auto !important;
+            z-index: 10001 !important;
+        }
+        
+        .mega-dropdown:hover {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+            pointer-events: auto !important;
+            z-index: 10001 !important;
+        }
+        
+        .mega-dropdown-content {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 25px 30px;
+            gap: 30px;
+            flex-wrap: wrap;
+            overflow: hidden;
+        }
+        
+        .dropdown-section {
+            flex: 1 1 auto;
+            padding: 0 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 250px;
+            max-width: 400px;
+        }
+        
+        .subcategory-grid {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 15px;
+            flex-wrap: wrap;
+            width: 100%;
+            padding-top: 15px;
+        }
+        
+        .subcategory-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 180px;
+            flex: 1;
+        }
+        
+        .subcategory-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .subcategory-item {
+            margin-bottom: 4px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .subcategory-link {
+            display: block;
+            padding: 8px 15px;
+            color: #212121;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 400;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 140px;
+        }
+        
+        .subcategory-link:hover {
+            background: #f8f9fa;
+            color: #333 !important;
+            text-decoration: none;
+        }
+
+        /* Admin dropdown specific styling */
+        .admin-dropdown {
+            min-width: 300px;
+        }
+
+        /* Cart dropdown specific styling */
+        .cart-dropdown {
+            min-width: 350px;
+            right: 0;
+            left: auto;
+        }
+
+        .cart-items-preview {
+            width: 100%;
+            min-width: 300px;
+        }
+
+        .cart-preview-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .cart-actions {
+            padding: 15px 0 5px 0;
+            text-align: center;
+        }
+
+        .cart-view-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #0c831f;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .cart-view-btn:hover {
+            background: #0a6e1a;
+            color: white !important;
+            text-decoration: none;
+        }
+
+        /* Profile dropdown specific styling */
+        .profile-dropdown {
+            min-width: 200px;
+            right: 0;
+            left: auto;
+        }
+
+        .logout-form {
+            margin: 0;
+            width: 100%;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 1024px) {
+            .category-menu-container {
+                padding: 0 15px;
+            }
+            
+            .brand-section {
+                margin-right: 20px;
+            }
+            
+            .modern-brand {
+                font-size: 20px;
+            }
+            
+            .category-menu-link {
+                padding: 16px 10px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .category-menu-container {
+                flex-wrap: wrap;
+                min-height: auto;
+                padding: 10px 15px;
+            }
+            
+            .category-menu {
+                flex-wrap: wrap;
+                gap: 2px;
+            }
+            
+            .category-menu-link {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+            
+            .modern-brand {
+                font-size: 18px;
+            }
+            
+            .navbar-right {
+                margin-left: 0;
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .mega-dropdown {
+                position: fixed;
+                top: auto;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                border-radius: 12px 12px 0 0;
+                max-height: 70vh;
+            }
+        }
+    </style>
+</th:block>
+
+<th:block th:fragment="category-shopping-scripts">
+    <script>
+        // Category Navigation Menu Functions (Based on categorywiseshopping.html)
+        let allCategoriesForMenu = [];
+
+        // Load all categories with their subcategories for navigation menu
+        async function loadCategoriesForMenu() {
+            console.log('Starting to load categories for navigation menu...');
+            
+            const endpoints = [
+                '/api/categories/with-subcategories',
+                window.location.origin + '/api/categories/with-subcategories'
+            ];
+            
+            for (let endpoint of endpoints) {
+                try {
+                    console.log('Menu navigation trying endpoint:', endpoint);
+                    const response = await fetch(endpoint);
+                    console.log('Menu navigation response status:', response.status);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error('HTTP error! status: ' + response.status + ', message: ' + errorText);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Menu navigation received data:', data);
+                    allCategoriesForMenu = data;
+                    
+                    if (!data || data.length === 0) {
+                        console.log('No categories found for navigation menu');
+                        document.getElementById('categoryMenu').innerHTML = 
+                            '<li style="padding: 20px; color: #666;">No categories available</li>';
+                        return;
+                    }
+                    
+                    renderCategoryNavigationMenu();
+                    return; // Success, exit the loop
+                } catch (error) {
+                    console.error('Menu navigation error with endpoint', endpoint, ':', error);
+                    if (endpoint === endpoints[endpoints.length - 1]) {
+                        // Last endpoint failed - show error
+                        document.getElementById('categoryMenu').innerHTML = 
+                            '<li style="padding: 20px; color: #dc3545;">' +
+                            '<i class="fas fa-exclamation-triangle"></i> Error loading menu: ' + error.message + 
+                            '</li>';
+                    }
+                }
+            }
+        }
+
+        // Render the category navigation menu
+        function renderCategoryNavigationMenu() {
+            console.log('Rendering category navigation menu with', allCategoriesForMenu.length, 'categories');
+            
+            if (!allCategoriesForMenu || allCategoriesForMenu.length === 0) {
+                document.getElementById('categoryMenu').innerHTML = 
+                    '<li class="loading-menu">No categories available</li>';
+                return;
+            }
+            
+            try {
+                const menuHtml = allCategoriesForMenu.map((category, index) => {
+                    console.log('Processing category for menu:', category.name, 'with', category.subcategories ? category.subcategories.length : 'NO SUBCATEGORIES', 'subcategories');
+                    
+                    // Check if subcategories exist and are an array
+                    if (!category.subcategories || !Array.isArray(category.subcategories)) {
+                        category.subcategories = [];
+                    }
+                    
+                    // Create subcategory sections
+                    const subcategorySections = [];
+                    
+                    if (category.subcategories.length > 0) {
+                        // Calculate optimal columns based on subcategory count
+                        const subcategoryCount = category.subcategories.length;
+                        let columnsCount = 1;
+                        
+                        if (subcategoryCount > 15) columnsCount = 4;
+                        else if (subcategoryCount > 10) columnsCount = 3;
+                        else if (subcategoryCount > 5) columnsCount = 2;
+                        
+                        const itemsPerColumn = Math.ceil(subcategoryCount / columnsCount);
+                        
+                        // Create columns
+                        const columns = [];
+                        for (let i = 0; i < columnsCount; i++) {
+                            const startIndex = i * itemsPerColumn;
+                            const endIndex = Math.min(startIndex + itemsPerColumn, subcategoryCount);
+                            columns.push(category.subcategories.slice(startIndex, endIndex));
+                        }
+                        
+                        // Generate subcategories HTML
+                        const columnsHtml = columns.map((columnItems) => {
+                            const subcategoriesHtml = columnItems.map((subcategory) => {
+                                return '<li class="subcategory-item">' +
+                                    '<a href="/categories/shopping?categoryId=' + category.id + '&categoryName=' + encodeURIComponent(category.name) + '&subcategoryId=' + subcategory.id + '&subcategoryName=' + encodeURIComponent(subcategory.name) + '" ' +
+                                       'class="subcategory-link" title="' + subcategory.name + '">' +
+                                        subcategory.name +
+                                    '</a>' +
+                                '</li>';
+                            }).join('');
+                            
+                            return '<div class="subcategory-column">' +
+                                    '<ul class="subcategory-list">' +
+                                        subcategoriesHtml +
+                                    '</ul>' +
+                                '</div>';
+                        }).join('');
+                        
+                        subcategorySections.push('<div class="dropdown-section">' +
+                                '<div class="subcategory-grid">' +
+                                    columnsHtml +
+                                '</div>' +
+                            '</div>'
+                        );
+                    }
+                    
+                    const categoryHtml = '<li class="category-menu-item" data-category-index="' + index + '">' +
+                            '<a href="#" class="category-menu-link">' +
+                                category.name +
+                            '</a>' +
+                            '<div class="mega-dropdown" data-dropdown-for="' + index + '">' +
+                                '<div class="mega-dropdown-content">' +
+                                    subcategorySections.join('') +
+                                '</div>' +
+                            '</div>' +
+                        '</li>';
+                    
+                    return categoryHtml;
+                }).join('');
+                
+                console.log('Setting innerHTML for category navigation menu');
+                document.getElementById('categoryMenu').innerHTML = menuHtml;
+                console.log('Category navigation menu rendered successfully');
+                
+                // Setup hover interactions
+                setTimeout(() => {
+                    setupMenuHoverInteractions();
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error rendering category navigation menu:', error);
+                document.getElementById('categoryMenu').innerHTML = 
+                    '<li class="loading-menu"><i class="fas fa-exclamation-triangle"></i> Error rendering menu</li>';
+            }
+        }
+
+        // Setup hover interactions for navigation menu
+        function setupMenuHoverInteractions() {
+            const categoryItems = document.querySelectorAll('.category-menu-item');
+            console.log('Setting up hover interactions for', categoryItems.length, 'menu categories');
+            
+            categoryItems.forEach((item, index) => {
+                const dropdown = item.querySelector('.mega-dropdown');
+                const categoryLink = item.querySelector('.category-menu-link');
+                
+                if (!dropdown) {
+                    console.log('No dropdown found for category item:', index);
+                    return;
+                }
+                
+                console.log('Setting up hover for category:', item.textContent.trim(), 'with dropdown:', dropdown);
+                
+                let hoverTimeout;
+                
+                // Show dropdown on mouseenter
+                item.addEventListener('mouseenter', function(e) {
+                    console.log('Mouse enter on category:', item.textContent.trim());
+                    clearTimeout(hoverTimeout);
+                    dropdown.style.display = 'block';
+                    dropdown.style.opacity = '1';
+                    dropdown.style.visibility = 'visible';
+                    dropdown.style.transform = 'translateY(0)';
+                    dropdown.style.pointerEvents = 'auto';
+                    dropdown.style.zIndex = '10001';
+                });
+                
+                // Hide dropdown on mouseleave with delay
+                item.addEventListener('mouseleave', function(e) {
+                    console.log('Mouse leave from category:', item.textContent.trim());
+                    hoverTimeout = setTimeout(() => {
+                        if (!dropdown.matches(':hover') && !item.matches(':hover')) {
+                            dropdown.style.opacity = '0';
+                            dropdown.style.visibility = 'hidden';
+                            dropdown.style.transform = 'translateY(-10px)';
+                            dropdown.style.pointerEvents = 'none';
+                        }
+                    }, 150);
+                });
+                
+                // Keep visible when hovering dropdown
+                dropdown.addEventListener('mouseenter', function() {
+                    console.log('Mouse enter on dropdown for category:', item.textContent.trim());
+                    clearTimeout(hoverTimeout);
+                    dropdown.style.display = 'block';
+                    dropdown.style.opacity = '1';
+                    dropdown.style.visibility = 'visible';
+                    dropdown.style.transform = 'translateY(0)';
+                    dropdown.style.pointerEvents = 'auto';
+                });
+                
+                dropdown.addEventListener('mouseleave', function() {
+                    console.log('Mouse leave from dropdown for category:', item.textContent.trim());
+                    dropdown.style.opacity = '0';
+                    dropdown.style.visibility = 'hidden';
+                    dropdown.style.transform = 'translateY(-10px)';
+                    dropdown.style.pointerEvents = 'none';
+                });
+            });
+            
+            console.log('Menu hover interactions setup complete');
+        }
+
+        // Initialize menu when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Category shopping menu DOM loaded');
+            loadCategoriesForMenu();
+        });
+    </script>
+</th:block>
+
+</html>

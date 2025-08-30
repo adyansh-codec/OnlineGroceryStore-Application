@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Basket - Blinkit Style</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"/>
+    <script src="/js/blinkit-cart.js"></script>
+    
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .cart-header {
+            background: linear-gradient(135deg, #0c831f 0%, #0a6f1a 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .cart-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .cart-item-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f0f0f0;
+        }
+        
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        
+        .cart-item-unit {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .cart-item-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0c831f;
+        }
+        
+        .cart-summary {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f0f0f0;
+            position: sticky;
+            top: 2rem;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .summary-row:last-child {
+            border-bottom: none;
+            font-size: 20px;
+            font-weight: 700;
+            color: #0c831f;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            background: #0c831f;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .checkout-btn:hover {
+            background: #0a6f1a;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .empty-cart i {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-cart h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-cart p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        
+        .continue-shopping {
+            background: #0c831f;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .continue-shopping:hover {
+            background: #0a6f1a;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="cart-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="text-center mb-2">My Basket</h1>
+                    <p class="text-center mb-0 opacity-75">
+                        <span th:text="${totalItems ?: 0}">0</span> items in your basket
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="cart-container">
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <!-- Empty Cart State -->
+                <div th:if="${cartItems == null or cartItems.isEmpty()}" class="empty-cart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h3>Your basket is empty</h3>
+                    <p>Looks like you haven't added any items to your basket yet.</p>
+                    <a href="/home" class="continue-shopping">
+                        <i class="fas fa-arrow-left"></i> Continue Shopping
+                    </a>
+                </div>
+
+                <!-- Cart Items -->
+                <div th:if="${cartItems != null and !cartItems.isEmpty()}">
+                    <div th:each="item : ${cartItems}" class="cart-item-card">
+                        <div class="cart-item">
+                            <img th:src="${item.imageUrl ?: '/images/default-product.png'}" 
+                                 th:alt="${item.name}" 
+                                 class="cart-item-image"
+                                 onerror="this.src='/images/default-product.png'">
+                            
+                            <div class="cart-item-details">
+                                <div class="cart-item-name" th:text="${item.name}">Product Name</div>
+                                <div class="cart-item-unit" th:text="${item.unit}">1 unit</div>
+                                <div class="cart-item-price">
+                                    ₹<span th:text="${item.totalPrice}">0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="blinkit-quantity-controls" th:attr="data-product-id=${item.id}">
+                                <button class="quantity-btn" th:onclick="'removeFromBlinkitCart(\'' + ${item.id} + '\')'">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="quantity-display" th:text="${item.quantity}">1</span>
+                                <button class="quantity-btn" th:onclick="'addToBlinkitCart(\'' + ${item.id} + '\', \'' + ${item.name} + '\', ' + ${item.price} + ', \'' + ${item.imageUrl} + '\', \'' + ${item.unit} + '\')'">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="col-lg-4" th:if="${cartItems != null and !cartItems.isEmpty()}">
+                <div class="cart-summary">
+                    <h4 class="mb-3">Order Summary</h4>
+                    
+                    <div class="summary-row">
+                        <span>Items (<span th:text="${totalItems ?: 0}">0</span>)</span>
+                        <span>₹<span th:text="${totalPrice ?: 0}">0</span></span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Delivery Charges</span>
+                        <span class="text-success">FREE</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Total Amount</span>
+                        <span>₹<span th:text="${totalPrice ?: 0}">0</span></span>
+                    </div>
+                    
+                    <form th:action="@{/cart/checkout}" method="post">
+                        <button type="submit" class="checkout-btn">
+                            <i class="fas fa-credit-card"></i> Proceed to Checkout
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <a href="/home" class="text-muted">
+                            <i class="fas fa-arrow-left"></i> Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Update cart UI after quantity changes
+        function refreshCartPage() {
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
+
+        // Override cart functions to refresh page after changes
+        if (typeof removeFromBlinkitCart !== 'undefined') {
+            const originalRemove = removeFromBlinkitCart;
+            removeFromBlinkitCart = function(productId) {
+                originalRemove(productId);
+                refreshCartPage();
+            };
+        }
+
+        if (typeof addToBlinkitCart !== 'undefined') {
+            const originalAdd = addToBlinkitCart;
+            addToBlinkitCart = function(productId, productName, price, imageUrl, unit) {
+                originalAdd(productId, productName, price, imageUrl, unit);
+                refreshCartPage();
+            };
+        }
+    </script>
+</body>
+</html>

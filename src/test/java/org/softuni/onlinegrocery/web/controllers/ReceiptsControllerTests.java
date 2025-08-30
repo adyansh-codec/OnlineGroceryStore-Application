@@ -108,7 +108,7 @@ public class ReceiptsControllerTests {
     @Test
     @WithMockUser
     public void getCustomerReceipts_whenAllReceiptsAreForCustomer_orders() {
-        receipts.addAll(List.of(
+        receipts.addAll(Arrays.asList(
                 new Receipt()
         ));
 

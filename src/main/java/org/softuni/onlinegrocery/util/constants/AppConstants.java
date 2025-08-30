@@ -10,7 +10,7 @@ public final class AppConstants {
     public static final String API_SECRET = "api_secret";
 
     public static final String UUID_STRING = "uuid-string";
-    public static final String UUID_GENERATOR = "org.hibernate.id.UUIDGenerator";
+    public static final String UUID_GENERATOR = "uuid2";
 
     public static final String FAVICON_URL= "https://res.cloudinary.com/mgpavlov/image/upload/v1554912174/icons8-shopping-cart-96.png";
     public static final String FAVICON= "favicon";

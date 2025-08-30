@@ -139,7 +139,7 @@ public class OrdersController extends BaseController {
         List<OrderProductServiceModel> products = orderServiceModel.getProducts();
 
         OrderDetailsViewModel order = modelMapper.map(orderServiceModel, OrderDetailsViewModel.class);
-        List<ShoppingCartItem> items = new ArrayList<>();
+     //   List<ShoppingCartItem> items = new ArrayList<>();
 
         Map<OrderProductServiceModel, Integer> productItems = new HashMap<>();
 
@@ -150,18 +150,19 @@ public class OrdersController extends BaseController {
         }
 
         for (Map.Entry<OrderProductServiceModel, Integer> productKVP : productItems.entrySet()) {
-            ShoppingCartItem shoppingCartItem = new ShoppingCartItem();
+           // ShoppingCartItem shoppingCartItem = null;
 
-            shoppingCartItem.setQuantity(productKVP.getValue());
-            OrderProductViewModel orderProductViewModel =
-                    modelMapper.map(productKVP.getKey(), OrderProductViewModel.class);
-            shoppingCartItem.setProduct(orderProductViewModel);
+            //shoppingCartItem.setQuantity(productKVP.getValue());
+            //OrderProductViewModel orderProductViewModel =
+               //     modelMapper.map(productKVP.getKey(), OrderProductViewModel.class);
+            //shoppingCartItem.setProduct(orderProductViewModel);
 
-            items.add(shoppingCartItem);
+            //items.add(shoppingCartItem);
         }
-        order.setItems(items);
+        //order.setItems(items);
+		return order;
 
-        return order;
+       // return order;
     }
 
     private List<OrderViewModel> mapListOrderServiceToViewModel(List<OrderServiceModel> orderServiceModel){

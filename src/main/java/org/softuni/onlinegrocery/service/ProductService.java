@@ -1,31 +1,35 @@
 package org.softuni.onlinegrocery.service;
 
-import org.softuni.onlinegrocery.domain.models.service.ProductServiceModel;
-import org.softuni.onlinegrocery.domain.models.view.ProductAllViewModel;
-import org.springframework.web.multipart.MultipartFile;
+import org.softuni.onlinegrocery.domain.models.service.ProductNewServiceModel;
 
-import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductService {
 
-    ProductServiceModel createProduct(ProductServiceModel productServiceModel,
-                                      MultipartFile image) throws IOException;
+    ProductNewServiceModel save(ProductNewServiceModel productNewServiceModel);
 
-    List<ProductServiceModel> findAllProducts();
+    ProductNewServiceModel findById(String id);
 
-    ProductServiceModel findProductById(String id);
+    List<ProductNewServiceModel> findBySubcategoryId(String subcategoryId);
 
-    List<ProductServiceModel> findProductsByPartOfName(String name);
+    List<ProductNewServiceModel> findByCategoryNewId(String categoryId);
 
-    ProductServiceModel editProduct(String id, ProductServiceModel productServiceModel,
-                                    boolean isNewImageUploaded, MultipartFile image) throws IOException;
+    List<ProductNewServiceModel> findAll();
 
-    void deleteProduct(String id);
+    List<ProductNewServiceModel> findByNameContaining(String name);
 
-    List<ProductServiceModel> findAllByCategory(String category);
+    List<ProductNewServiceModel> findByBrand(String brand);
 
-    List<ProductServiceModel> findAllFilteredProducts();
+    List<ProductNewServiceModel> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
 
-    List<ProductServiceModel> findAllByCategoryFilteredProducts(String category);
+    List<ProductNewServiceModel> findInStock();
+
+    ProductNewServiceModel update(String id, ProductNewServiceModel productNewServiceModel);
+
+    void delete(String id);
+
+    void activate(String id);
+
+    void deactivate(String id);
 }

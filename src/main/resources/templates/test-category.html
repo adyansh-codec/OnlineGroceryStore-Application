@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Test Category Links</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .category-link { 
+            display: block; 
+            margin: 10px 0; 
+            padding: 10px; 
+            background: #f0f0f0; 
+            text-decoration: none; 
+            color: #333; 
+            border-radius: 5px;
+        }
+        .category-link:hover { background: #e0e0e0; }
+    </style>
+</head>
+<body>
+    <h1>Test Category Links</h1>
+    
+    <p>Click on any category to test the category products page (using category IDs):</p>
+    
+    <div id="categoryLinks">
+        <p>Loading categories...</p>
+    </div>
+    
+    <h2>Debug URLs</h2>
+    <a href="/products/api/debug/category-mapping" target="_blank">Category Mapping</a><br>
+    <a href="/products/api/debug/categories" target="_blank">All Categories</a><br>
+    <a href="/categories/fetch" target="_blank">Categories Fetch</a><br>
+    
+    <script>
+        // Load categories dynamically and create links with their IDs
+        console.log('Loading categories from /categories/fetch...');
+        fetch('/categories/fetch')
+            .then(response => {
+                console.log('Categories fetch response status:', response.status);
+                return response.json();
+            })
+            .then(categories => {
+                console.log('Categories received:', categories);
+                const container = document.getElementById('categoryLinks');
+                container.innerHTML = '';
+                
+                if (!categories || categories.length === 0) {
+                    container.innerHTML = '<p style="color: orange;">No categories found</p>';
+                    return;
+                }
+                
+                categories.forEach((category, index) => {
+                    console.log(`Category ${index}:`, category);
+                    const link = document.createElement('a');
+                    link.href = `/categories/products/${category.id}`;
+                    link.className = 'category-link';
+                    link.textContent = `${category.name} (ID: ${category.id})`;
+                    container.appendChild(link);
+                    
+                    // Add debug link
+                    const debugLink = document.createElement('a');
+                    debugLink.href = `/categories/debug/${category.id}`;
+                    debugLink.target = '_blank';
+                    debugLink.style.marginLeft = '10px';
+                    debugLink.style.fontSize = '12px';
+                    debugLink.textContent = 'Debug';
+                    link.appendChild(debugLink);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading categories:', error);
+                document.getElementById('categoryLinks').innerHTML = 
+                    '<p style="color: red;">Error loading categories: ' + error.message + '</p>';
+            });
+    </script>
+    
+</body>
+</html>

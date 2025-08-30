@@ -1,6 +1,7 @@
 package org.softuni.onlinegrocery.service;
 
 
+import org.softuni.onlinegrocery.domain.entities.User;
 import org.softuni.onlinegrocery.domain.models.service.UserServiceModel;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public interface UserService {
     void updateRole(String id, String role);
 
     UserServiceModel findUserByUserName(String name);
+    
+    User findByEmail(String email);
 }

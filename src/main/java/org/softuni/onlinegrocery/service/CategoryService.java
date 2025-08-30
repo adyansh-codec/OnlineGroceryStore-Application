@@ -1,20 +1,22 @@
 package org.softuni.onlinegrocery.service;
 
-import org.softuni.onlinegrocery.domain.models.service.CategoryServiceModel;
+import org.softuni.onlinegrocery.domain.models.service.CategoryNewServiceModel;
 
 import java.util.List;
 
 public interface CategoryService {
 
-    CategoryServiceModel addCategory(CategoryServiceModel categoryServiceModel);
+    CategoryNewServiceModel save(CategoryNewServiceModel categoryNewServiceModel);
 
-    List<CategoryServiceModel> findAllCategories();
+    List<CategoryNewServiceModel> findAll();
 
-    CategoryServiceModel findCategoryById(String id);
+    CategoryNewServiceModel findById(String id);
 
-    CategoryServiceModel editCategory(String id, CategoryServiceModel categoryServiceModel);
+    CategoryNewServiceModel update(String id, CategoryNewServiceModel categoryNewServiceModel);
 
-    CategoryServiceModel deleteCategory(String id);
+    void delete(String id);
 
-    List<CategoryServiceModel> findAllFilteredCategories();
+    List<CategoryNewServiceModel> findAllActive();
+    
+    List<String> findAllCategoryNames();
 }

@@ -33,7 +33,7 @@ public class UserController extends BaseController {
     }
 
     @GetMapping("/register")
-    @PreAuthorize("isAnonymous()")
+   // @PreAuthorize("isAnonymous()")
     @PageTitle(REGISTER)
     public ModelAndView renderRegister(@ModelAttribute(name = MODEL) UserRegisterBindingModel model,
                                        ModelAndView modelAndView) {
@@ -65,7 +65,7 @@ public class UserController extends BaseController {
             modelAndView.addObject(ERROR, "Error");
         }
 
-        return view("/login", modelAndView);
+        return view("login", modelAndView);
     }
 
     @GetMapping("/user/profile/{username}")
@@ -80,7 +80,7 @@ public class UserController extends BaseController {
 
         modelAndView.addObject(VIEW_MODEL, usersViewModel);
 
-        return view("/profile", modelAndView);
+        return view("profile", modelAndView);
     }
 
     @GetMapping("/admin/users")
@@ -88,7 +88,7 @@ public class UserController extends BaseController {
     @PageTitle(USERS)
     public ModelAndView renderAllUsersPage() {
 
-        return view("/users-all");
+        return view("users-all");
     }
 
     @PostMapping("/users/edit/role/{id}")

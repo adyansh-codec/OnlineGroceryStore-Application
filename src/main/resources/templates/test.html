@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+ <link rel="stylesheet" href="https://cdnjs.clouflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"/>
+<!-- font awesome  -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"/>
+ 
+<style>
+.infinite-scroll-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 20px 0;
+}
+
+.infinite-scroll-track {
+  display: flex;
+  gap: 20px;
+  animation: scroll-cards 20s linear infinite;
+  padding: 0 20px;
+}
+
+.infinite-scroll-card {
+  flex: 0 0 250px;
+  height: 200px;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.infinite-scroll-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-content {
+  height: 100%;
+  padding: 20px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.card-content i {
+  font-size: 32px;
+  margin-bottom: 15px;
+}
+
+.card-content h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.card-content p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+@keyframes scroll-cards {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-250px * 3 - 60px));
+  }
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .infinite-scroll-card {
+    background: linear-gradient(135deg, #8a3eff, #3a7bd5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .infinite-scroll-container {
+    max-width: 100%;
+    padding: 15px 0;
+  }
+  
+  .infinite-scroll-card {
+    flex: 0 0 200px;
+    height: 160px;
+  }
+  
+  .card-content i {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .card-content h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .card-content p {
+    font-size: 12px;
+  }
+  
+  @keyframes scroll-cards {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-200px * 3 - 60px));
+    }
+  }
+}
+.animated-search {
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-container {
+  position: relative;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.search-container:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.search-container i {
+  color: var(--text-secondary);
+  font-size: 16px;
+  transition: transform 0.3s ease;
+}
+
+.search-container:focus-within i {
+  transform: scale(1.1);
+  color: var(--accent);
+}
+
+.search-input {
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-size: 16px;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border-radius: 0 0 12px 12px;
+  margin-top: 4px;
+  padding: 8px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.search-container:focus-within .search-suggestions {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.suggestion-item {
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.suggestion-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .search-container {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .search-container:focus-within {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .search-suggestions {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+.divider:after,
+.divider:before {
+content: "";
+flex: 1;
+height: 1px;
+background: #eee;
+}
+</style>
+<body>
+<!-- Font Awesome Icons; Make sure to add it in the <head> tag -->
+  
+  
+<div class="animated-search">
+  <div class="search-container" style="position:relative;">
+    <i class="fas fa-search"></i>
+    <input type="text" placeholder="Search..." class="search-input" id="productSearchInput" autocomplete="off">
+    <div id="productList" class="list-group" style="position:absolute; top:100%; left:0; right:0; z-index:1000; display:none;"></div>
+  </div>
+</div>
+<!-- Font Awesome Icons; Make sure to add it in the <head> tag -->
+<!-- Login Button -->
+<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#loginModal">login</button>
+
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title w-100 text-center font-weight-bold" id="loginModalLabel">Sign In to Your Account</h5>
+        <button type="button" class="close position-absolute right-0 mr-3 mt-2" data-dismiss="modal" aria-label="Close" style="z-index:2;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-0">
+        <section class="vh-100 m-0 d-flex align-items-center justify-content-center" style="background: #f8f9fa;">
+          <div class="container py-4">
+            <div class="row justify-content-center align-items-center">
+              <div class="col-md-6 d-none d-md-block">
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+                  class="img-fluid" alt="Login illustration">
+              </div>
+              <div class="col-md-6">
+                <form class="bg-white p-4 rounded-4 shadow-sm">
+                  <!-- Email input -->
+                  <div class="form-group mb-3">
+                    <label for="form1Example13" class="font-weight-bold">Email address</label>
+                    <input type="email" id="form1Example13" class="form-control form-control-lg" placeholder="Enter your email" />
+                  </div>
+                  <!-- Password input -->
+                  <div class="form-group mb-3">
+                    <label for="form1Example23" class="font-weight-bold">Password</label>
+                    <input type="password" id="form1Example23" class="form-control form-control-lg" placeholder="Enter your password" />
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="" id="form1Example3" checked />
+                      <label class="form-check-label" for="form1Example3"> Remember me </label>
+                    </div>
+                    <a href="#" class="small text-primary">Forgot password?</a>
+                  </div>
+                  <!-- Submit button -->
+                  <button type="submit" class="btn btn-primary btn-lg btn-block w-100 mb-3">Sign in</button>
+                  <div class="divider d-flex align-items-center my-3">
+                    <span class="w-100 border-bottom"></span>
+                    <span class="mx-2 text-muted">OR</span>
+                    <span class="w-100 border-bottom"></span>
+                  </div>
+                  <a class="btn btn-outline-primary btn-lg btn-block w-100 mb-2" style="background-color: #3b5998; color: #fff;" href="#">
+                    <i class="fab fa-facebook-f mr-2"></i>Continue with Facebook
+                  </a>
+                  <a class="btn btn-outline-info btn-lg btn-block w-100" style="background-color: #55acee; color: #fff;" href="#">
+                    <i class="fab fa-twitter mr-2"></i>Continue with Twitter
+                  </a>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="infinite-scroll-container">
+  <div class="infinite-scroll-track">
+    <div class="infinite-scroll-card">
+      <div class="card-content">
+        <i class="fas fa-star"></i>
+        <h3>Card 1</h3>
+        <p>Scroll to see more</p>
+      </div>
+    </div>
+    <div class="infinite-scroll-card">
+      <div class="card-content">
+        <i class="fas fa-heart"></i>
+        <h3>Card 2</h3>
+        <p>Scroll to see more</p>
+      </div>
+    </div>
+    <div class="infinite-scroll-card">
+      <div class="card-content">
+        <i class="fas fa-moon"></i>
+        <h3>Card 3</h3>
+        <p>Scroll to see more</p>
+      </div>
+    </div>
+    <!-- Duplicate cards for seamless loop -->
+    <div class="infinite-scroll-card">
+      <div class="card-content">
+        <i class="fas fa-star"></i>
+        <h3>Card 1</h3>
+        <p>Scroll to see more</p>
+      </div>
+    </div>
+    <div class="infinite-scroll-card">
+      <div class="card-content">
+        <i class="fas fa-heart"></i>
+        <h3>Card 2</h3>
+        <p>Scroll to see more</p>
+      </div>
+    </div>
+    <div class="infinite-scroll-card">
+      <div class="card-content">
+        <i class="fas fa-moon"></i>
+        <h3>Card 3</h3>
+        <p>Scroll to see more</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add this inside the <body> tag where you want to show the location info -->
+<div id="location-info" class="alert alert-info mt-3" style="display:none;"></div>
+
+<script>
+  // Detect and display user's location
+  function showLocation(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    document.getElementById('location-info').style.display = 'block';
+    document.getElementById('location-info').textContent = `Your location: Latitude ${lat.toFixed(4)}, Longitude ${lon.toFixed(4)}`;
+  }
+
+  function showError(error) {
+    let message = "Unable to retrieve your location.";
+    if (error.code === 1) message = "Permission denied for location.";
+    if (error.code === 2) message = "Location unavailable.";
+    if (error.code === 3) message = "Location request timed out.";
+    document.getElementById('location-info').style.display = 'block';
+    document.getElementById('location-info').textContent = message;
+  }
+
+  // Call this on page load
+  window.addEventListener('DOMContentLoaded', function() {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(showLocation, showError);
+    } else {
+      document.getElementById('location-info').style.display = 'block';
+      document.getElementById('location-info').textContent = "Geolocation is not supported by your browser.";
+    }
+  });
+</script>
+
+<!-- Bootstrap JS (place before </body>) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('productSearchInput');
+    const productList = document.getElementById('productList');
+
+    searchInput.addEventListener('focus', function() {
+        fetch('/api/products/all') // Replace with your actual endpoint
+            .then(response => response.json())
+            .then(products => {
+                productList.innerHTML = '';
+                if (products.length > 0) {
+                    products.forEach(product => {
+                        const item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'list-group-item list-group-item-action';
+                        item.textContent = product.name;
+                        item.onclick = function() {
+                            searchInput.value = product.name;
+                            productList.style.display = 'none';
+                        };
+                        productList.appendChild(item);
+                    });
+                    productList.style.display = 'block';
+                } else {
+                    productList.style.display = 'none';
+                }
+            });
+    });
+
+    // Hide list when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !productList.contains(e.target)) {
+            productList.style.display = 'none';
+        }
+    });
+});
+</script>
+
+</body>
+</html>

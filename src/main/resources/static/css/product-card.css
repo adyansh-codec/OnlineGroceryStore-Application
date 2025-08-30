@@ -1,0 +1,300 @@
+/* Product Category Card CSS - Updated to match sample structure */
+.product-category-card {
+    width: 120px;
+    height: auto; /* Changed to auto to accommodate text content */
+    min-height: 151.6176470588235px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.product-category-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Image container matching the sample structure */
+.product-category-card .card-image {
+    width: 120px;
+    height: 120px; /* Reduced height to make room for text */
+    position: relative;
+    overflow: hidden;
+}
+
+.product-category-card .card-image img {
+    width: 120px;
+    height: 120px; /* Matching the container */
+    border-radius: 0px;
+    object-fit: cover; /* Changed from fill to cover for better image display */
+    cursor: pointer;
+}
+
+/* Card content styles for name and description */
+.product-category-card .card-content {
+    padding: 8px;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.product-category-card .category-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.product-category-card .category-description {
+    font-size: 9px;
+    color: #666;
+    margin: 0;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-category-card {
+        width: 90px;
+        min-height: 120px;
+    }
+    
+    .product-category-card .card-image {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .product-category-card .card-image img {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .product-category-card .card-content {
+        padding: 6px;
+    }
+    
+    .product-category-card .category-name {
+        font-size: 10px;
+    }
+    
+    .product-category-card .category-description {
+        font-size: 8px;
+    }
+}
+
+/* Grid container for cards */
+.category-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    justify-content: flex-start;
+}
+
+/* Alternative grid layout */
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 20px;
+    padding: 24px;
+    align-items: start;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+    .category-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 16px;
+        padding: 20px;
+    }
+}
+
+/* Loading state */
+.product-category-card.loading {
+    background: #f8f8f8;
+    border-radius: 8px;
+    animation: shimmer 1.5s infinite linear;
+}
+
+.product-category-card.loading .card-image {
+    width: 120px;
+    height: 120px; /* Updated to match new image height */
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Badge for new/featured items */
+.product-category-card .badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: #FF6B6B;
+    color: white;
+    font-size: 8px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+    z-index: 1;
+}
+
+.product-category-card .badge.new {
+    background: #4ECDC4;
+}
+
+.product-category-card .badge.featured {
+    background: #FFE66D;
+    color: #333;
+}
+
+
+
+/* Subcategory Carousel Styles */
+.subcategory-carousel-container {
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.subcategory-card {
+    width: 140px;
+    min-width: 140px;
+    height: 180px;
+    margin: 0 10px;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.subcategory-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.subcategory-card .subcategory-image {
+    width: 140px;
+    height: 120px;
+    position: relative;
+    overflow: hidden;
+}
+
+.subcategory-card .subcategory-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+}
+
+.subcategory-card .subcategory-content {
+    padding: 10px;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.subcategory-card .subcategory-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.subcategory-card .subcategory-description {
+    font-size: 10px;
+    color: #666;
+    margin: 0;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.carousel-nav-btn {
+    background: #007bff !important;
+    border: none !important;
+    color: white !important;
+    transition: all 0.2s ease;
+}
+
+.carousel-nav-btn:hover {
+    background: #0056b3 !important;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-nav-btn:disabled {
+    background: #ccc !important;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Responsive adjustments for subcategory carousel */
+@media (max-width: 768px) {
+    .subcategory-card {
+        width: 110px;
+        min-width: 110px;
+        height: 150px;
+        margin: 0 8px;
+    }
+
+    .subcategory-card .subcategory-image {
+        width: 110px;
+        height: 90px;
+    }
+
+    .subcategory-card .subcategory-content {
+        padding: 8px;
+    }
+
+    .subcategory-card .subcategory-name {
+        font-size: 11px;
+    }
+
+    .subcategory-card .subcategory-description {
+        font-size: 9px;
+    }
+
+    .carousel-nav-btn {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+

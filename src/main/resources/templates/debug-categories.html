@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Debug Categories</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .category-btn { 
+            margin: 5px; 
+            padding: 10px 15px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+        .category-btn:hover { background: #0056b3; }
+        .products { margin-top: 20px; }
+        .product { 
+            border: 1px solid #ddd; 
+            margin: 10px 0; 
+            padding: 10px; 
+            border-radius: 5px; 
+        }
+        .debug-info { 
+            background: #f8f9fa; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            font-family: monospace; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Category Debug Page</h1>
+    
+    <h2>Available Categories</h2>
+    <div id="categories"></div>
+    
+    <h2>Categories with IDs</h2>
+    <div id="categories-with-ids"></div>
+    
+    <h2>Test Category Product Fetching (by Name)</h2>
+    <div id="category-buttons"></div>
+    
+    <h2>Test Category Product Fetching (by ID)</h2>
+    <div id="category-id-buttons"></div>
+    
+    <div id="debug-info" class="debug-info"></div>
+    <div id="products" class="products"></div>
+
+    <script>
+        $(document).ready(function() {
+            // Load available categories
+            fetch('/products/api/debug/categories')
+                .then(response => response.json())
+                .then(categories => {
+                    console.log('Available categories:', categories);
+                    $('#categories').html('<p>' + categories.join(', ') + '</p>');
+                    
+                    // Create buttons for each category
+                    categories.forEach(category => {
+                        const button = $('<button class="category-btn">' + category + '</button>');
+                        button.click(() => testCategory(category));
+                        $('#category-buttons').append(button);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading categories:', error);
+                    $('#categories').html('<p style="color: red;">Error loading categories: ' + error.message + '</p>');
+                });
+            
+            // Load categories with IDs
+            fetch('/products/api/debug/categories-with-ids')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Categories with IDs:', data);
+                    let categoriesHtml = '<table border="1" style="border-collapse: collapse;"><tr><th>Category ID</th><th>Category Name</th><th>Test</th></tr>';
+                    data.categories.forEach(category => {
+                        categoriesHtml += '<tr>';
+                        categoriesHtml += '<td>' + category.id + '</td>';
+                        categoriesHtml += '<td>' + category.name + '</td>';
+                        categoriesHtml += '<td><button class="category-btn" onclick="testCategoryById(\'' + category.id + '\', \'' + category.name + '\')">Test by ID</button></td>';
+                        categoriesHtml += '</tr>';
+                    });
+                    categoriesHtml += '</table>';
+                    $('#categories-with-ids').html(categoriesHtml);
+                })
+                .catch(error => {
+                    console.error('Error loading categories with IDs:', error);
+                    $('#categories-with-ids').html('<p style="color: red;">Error loading categories with IDs: ' + error.message + '</p>');
+                });
+            
+            // Also load all products with their categories
+            fetch('/products/api/debug/products-with-categories')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('All products with categories:', data);
+                    let debugHtml = '<h3>All Products and Their Categories:</h3>';
+                    data.products.forEach(product => {
+                        debugHtml += '<div class="product">';
+                        debugHtml += '<strong>' + product.name + '</strong><br>';
+                        debugHtml += 'Categories: ' + product.categories.join(', ');
+                        debugHtml += '</div>';
+                    });
+                    $('#debug-info').html(debugHtml);
+                })
+                .catch(error => {
+                    console.error('Error loading products:', error);
+                });
+        });
+        
+        function testCategory(categoryName) {
+            $('#products').html('<p>Loading products for category: ' + categoryName + '...</p>');
+            
+            fetch('/products/api/category/' + encodeURIComponent(categoryName))
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error('HTTP ' + response.status + ': ' + text);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(products => {
+                    console.log('Products for ' + categoryName + ':', products);
+                    displayProducts(products, categoryName, 'by name');
+                })
+                .catch(error => {
+                    console.error('Error fetching products for ' + categoryName + ':', error);
+                    $('#products').html('<p style="color: red;">Error: ' + error.message + '</p>');
+                });
+        }
+        
+        function testCategoryById(categoryId, categoryName) {
+            $('#products').html('<p>Loading products for category ID: ' + categoryId + ' (' + categoryName + ')...</p>');
+            
+            fetch('/products/api/category-id/' + encodeURIComponent(categoryId))
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error('HTTP ' + response.status + ': ' + text);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(products => {
+                    console.log('Products for category ID ' + categoryId + ':', products);
+                    displayProducts(products, categoryName + ' (ID: ' + categoryId + ')', 'by ID');
+                })
+                .catch(error => {
+                    console.error('Error fetching products for category ID ' + categoryId + ':', error);
+                    $('#products').html('<p style="color: red;">Error: ' + error.message + '</p>');
+                });
+        }
+        
+        function displayProducts(products, categoryInfo, method) {
+            let html = '<h3>Products in "' + categoryInfo + '" (' + products.length + ' found ' + method + '):</h3>';
+            
+            if (products.length === 0) {
+                html += '<p>No products found in this category.</p>';
+            } else {
+                products.forEach(product => {
+                    html += '<div class="product">';
+                    html += '<strong>' + product.name + '</strong><br>';
+                    html += 'Price: ₹' + product.price;
+                    if (product.discountedPrice) {
+                        html += ' → ₹' + product.discountedPrice;
+                    }
+                    html += '<br>Description: ' + (product.description || 'No description');
+                    html += '</div>';
+                });
+            }
+            
+            $('#products').html(html);
+        }
+    </script>
+</body>
+</html>

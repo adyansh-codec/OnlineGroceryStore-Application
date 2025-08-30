@@ -1,4 +1,4 @@
-package org.softuni.onlinegrocery.unit.validation;//package org.softuni.productshop.unit.validation;
+package org.softuni.onlinegrocery.unit.validation;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -6,12 +6,12 @@ import org.softuni.onlinegrocery.domain.entities.Category;
 import org.softuni.onlinegrocery.domain.entities.Product;
 import org.softuni.onlinegrocery.domain.models.service.CategoryServiceModel;
 import org.softuni.onlinegrocery.domain.models.service.ProductServiceModel;
-import org.softuni.onlinegrocery.service.ProductService;
 import org.softuni.onlinegrocery.validation.ProductValidationService;
 import org.softuni.onlinegrocery.validation.implementations.ProductionValidationServiceImpl;
 
 import java.util.ArrayList;
-import java.util.List;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -27,7 +27,7 @@ public class ProductValidationServiceTests {
     @Test
     public void isValidWithProduct_whenValid_true() {
         Product product = new Product();
-        product.setCategories(List.of(new Category()));
+        product.setCategories(Arrays.asList(new Category()));
         boolean result = service.isValid(product);
         assertTrue(result);
     }
@@ -49,7 +49,7 @@ public class ProductValidationServiceTests {
     @Test
     public void isValidWithProductServiceModel_whenValid_true() {
         ProductServiceModel product = new ProductServiceModel();
-        product.setCategories(List.of(new CategoryServiceModel()));
+        product.setCategories(Arrays.asList(new CategoryServiceModel()));
         boolean result = service.isValid(product);
         assertTrue(result);
     }

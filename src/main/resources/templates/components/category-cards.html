@@ -1,0 +1,141 @@
+<!-- Category Cards Component for Thymeleaf Integration -->
+<!-- Add this CSS to your main stylesheet or include the product-card.css file -->
+
+<div class="category-grid">
+    <!-- Dynamic category cards using Thymeleaf -->
+    <div th:each="category : ${categories}" class="product-category-card" 
+         th:onclick="|window.location.href='/category/' + ${category.id}|"
+         style="cursor: pointer;">
+         
+        <!-- Optional badge for featured/new categories -->
+        <div th:if="${category.featured}" class="badge featured">HOT</div>
+        <div th:if="${category.isNew}" class="badge new">NEW</div>
+        
+        <div class="card-image">
+            <img th:if="${category.imageUrl != null and !category.imageUrl.isEmpty()}" 
+                 th:src="${category.imageUrl}" 
+                 th:alt="${category.name}"
+                 loading="lazy"
+                 onerror="this.parentElement.innerHTML='<span style=\'font-size: 48px;\'>🏪</span>'">
+            
+            <!-- Fallback emoji for categories without images -->
+            <span th:unless="${category.imageUrl != null and !category.imageUrl.isEmpty()}" 
+                  style="font-size: 48px;"
+                  th:text="${category.emoji != null ? category.emoji : '🏪'}"></span>
+        </div>
+        
+        <div class="card-content">
+            <h3 class="card-title" th:text="${category.name}">Category Name</h3>
+            <p class="card-subtitle" th:text="${category.description}">Category Description</p>
+        </div>
+    </div>
+</div>
+
+<!-- Example with static data for testing -->
+<div class="category-grid">
+    <div class="product-category-card" onclick="window.location.href='/category/fruits-vegetables'">
+        <div class="card-image" style="background: #e8f5e8;">
+            <span style="font-size: 48px;">🥬</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">Fruits & Vegetables</h3>
+            <p class="card-subtitle">Fresh & Organic</p>
+        </div>
+    </div>
+    
+    <div class="product-category-card" onclick="window.location.href='/category/dairy-eggs'">
+        <div class="badge featured">HOT</div>
+        <div class="card-image" style="background: #fff3e0;">
+            <span style="font-size: 48px;">🥛</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">Dairy & Eggs</h3>
+            <p class="card-subtitle">Farm Fresh</p>
+        </div>
+    </div>
+    
+    <div class="product-category-card" onclick="window.location.href='/category/meat-seafood'">
+        <div class="card-image" style="background: #ffe0e0;">
+            <span style="font-size: 48px;">🥩</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">Meat & Seafood</h3>
+            <p class="card-subtitle">Premium Quality</p>
+        </div>
+    </div>
+    
+    <div class="product-category-card" onclick="window.location.href='/category/bakery'">
+        <div class="card-image" style="background: #fdf4e3;">
+            <span style="font-size: 48px;">🍞</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">Bakery</h3>
+            <p class="card-subtitle">Fresh Baked</p>
+        </div>
+    </div>
+    
+    <div class="product-category-card" onclick="window.location.href='/category/beverages'">
+        <div class="card-image" style="background: #e3f2fd;">
+            <span style="font-size: 48px;">🥤</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">Beverages</h3>
+            <p class="card-subtitle">Refreshing Drinks</p>
+        </div>
+    </div>
+    
+    <div class="product-category-card" onclick="window.location.href='/category/pantry-staples'">
+        <div class="card-image" style="background: #f3e5f5;">
+            <span style="font-size: 48px;">🌾</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">Pantry Staples</h3>
+            <p class="card-subtitle">Essential Items</p>
+        </div>
+    </div>
+    
+    <div class="product-category-card" onclick="window.location.href='/category/snacks'">
+        <div class="badge new">NEW</div>
+        <div class="card-image" style="background: #fff8e1;">
+            <span style="font-size: 48px;">🍿</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">Snacks & Confectionery</h3>
+            <p class="card-subtitle">Tasty Treats</p>
+        </div>
+    </div>
+    
+    <div class="product-category-card" onclick="window.location.href='/category/health-wellness'">
+        <div class="card-image" style="background: #e8f5e8;">
+            <span style="font-size: 48px;">🌱</span>
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">Health & Wellness</h3>
+            <p class="card-subtitle">Organic Products</p>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for enhanced interaction -->
+<script>
+document.querySelectorAll('.product-category-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-4px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+    
+    card.addEventListener('click', function() {
+        // Add loading state
+        this.style.opacity = '0.7';
+        this.style.pointerEvents = 'none';
+        
+        setTimeout(() => {
+            this.style.opacity = '1';
+            this.style.pointerEvents = 'auto';
+        }, 300);
+    });
+});
+</script>

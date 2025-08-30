@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle ?: 'Online Grocery Store'}">Online Grocery Store</title>
+    
+    <!-- Core CSS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/home.css"/>
+    
+    <!-- Unified Cart Styles -->
+    <div th:replace="fragments/unified-cart :: cart-styles"></div>
+    
+    <!-- Page Specific Styles -->
+    <th:block th:fragment="page-styles">
+        <!-- Override in child templates for page-specific styles -->
+    </th:block>
+</head>
+<body>
+    <!-- Main Content Area -->
+    <main th:fragment="content">
+        <!-- Override in child templates -->
+        <div class="container">
+            <h1>Base Layout - Override this content</h1>
+        </div>
+    </main>
+    
+    <!-- Unified Shopping Cart (Always Present) -->
+    <div th:replace="fragments/unified-cart :: cart"></div>
+    
+    <!-- Core JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Unified Cart Scripts -->
+    <div th:replace="fragments/unified-cart :: cart-scripts"></div>
+    
+    <!-- Page Specific Scripts -->
+    <th:block th:fragment="page-scripts">
+        <!-- Override in child templates for page-specific scripts -->
+    </th:block>
+    
+    <!-- Global Cart Helper Functions -->
+    <script>
+        // Enhanced global function to add products to cart with product details
+        function addProductToCart(productId, quantity = 1, productData = null) {
+            console.log('Adding product to cart:', productId);
+            
+            // If product data is not provided, try to extract from page
+            if (!productData) {
+                productData = extractProductDataFromPage(productId);
+            }
+            
+            if (typeof addToUnifiedCart === 'function') {
+                addToUnifiedCart(productId, quantity, productData);
+            } else {
+                console.error('Unified cart not available');
+                // Fallback to traditional form submission
+                fallbackAddToCart(productId, quantity);
+            }
+        }
+        
+        // Extract product data from current page (useful for product detail pages)
+        function extractProductDataFromPage(productId) {
+            try {
+                // Try to extract from Thymeleaf variables first
+                const productName = document.querySelector('[data-product-name]')?.dataset.productName ||
+                                  document.querySelector('.product-title')?.textContent ||
+                                  document.querySelector('h1')?.textContent;
+                
+                const productPrice = document.querySelector('[data-product-price]')?.dataset.productPrice ||
+                                   document.querySelector('.current-price')?.textContent?.replace(/[₹,]/g, '') ||
+                                   document.querySelector('.product-price')?.textContent?.replace(/[₹,]/g, '');
+                
+                const productImage = document.querySelector('[data-product-image]')?.dataset.productImage ||
+                                   document.querySelector('#mainProductImage')?.src ||
+                                   document.querySelector('.product-image img')?.src;
+                
+                const productUnit = document.querySelector('[data-product-unit]')?.dataset.productUnit ||
+                                  document.querySelector('.unit-size')?.textContent ||
+                                  '1 piece';
+                
+                if (productName && productPrice) {
+                    return {
+                        id: productId,
+                        name: productName.trim(),
+                        price: parseFloat(productPrice),
+                        imageUrl: productImage,
+                        unit: productUnit
+                    };
+                }
+            } catch (error) {
+                console.error('Error extracting product data:', error);
+            }
+            
+            return null;
+        }
+        
+        // Fallback method for adding to cart
+        function fallbackAddToCart(productId, quantity) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/cart/add-product';
+            
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'id';
+            idInput.value = productId;
+            
+            const quantityInput = document.createElement('input');
+            quantityInput.type = 'hidden';
+            quantityInput.name = 'quantity';
+            quantityInput.value = quantity;
+            
+            form.appendChild(idInput);
+            form.appendChild(quantityInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+        
+        // Function to handle quick add to cart from product cards
+        function quickAddToCart(productId, productName, productPrice, productImage, productUnit = '1 piece') {
+            const productData = {
+                id: productId,
+                name: productName,
+                price: parseFloat(productPrice),
+                imageUrl: productImage,
+                unit: productUnit
+            };
+            
+            addProductToCart(productId, 1, productData);
+        }
+    </script>
+</body>
+</html>

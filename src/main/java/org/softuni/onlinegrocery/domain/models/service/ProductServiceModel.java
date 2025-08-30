@@ -21,6 +21,7 @@ public class ProductServiceModel extends BaseServiceModel {
     private List<CategoryServiceModel> categories;
     private BigDecimal discountedPrice;
     private boolean isDeleted;
+    private String brand;
 
     public ProductServiceModel() {
     }
@@ -88,5 +89,13 @@ public class ProductServiceModel extends BaseServiceModel {
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 }

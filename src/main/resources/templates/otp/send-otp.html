@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Send OTP - Grocery Store</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .otp-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+        }
+        .otp-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .otp-header i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            background: none;
+        }
+        .nav-tabs .nav-link.active {
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+        }
+        .btn-send-otp {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem;
+            font-weight: 600;
+        }
+        .btn-send-otp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .alert {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="otp-card">
+                    <div class="otp-header">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>Send OTP Verification</h3>
+                        <p class="text-muted">Choose your preferred method to receive OTP</p>
+                    </div>
+
+                    <div id="alertContainer"></div>
+
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="otpTabs" role="tablist">
+                        <li class="nav-item flex-fill">
+                            <a class="nav-link active text-center" id="sms-tab" data-toggle="tab" href="#sms" role="tab">
+                                <i class="fas fa-sms"></i> SMS
+                            </a>
+                        </li>
+                        <li class="nav-item flex-fill">
+                            <a class="nav-link text-center" id="email-tab" data-toggle="tab" href="#email" role="tab">
+                                <i class="fas fa-envelope"></i> Email
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="otpTabContent">
+                        <!-- SMS Tab -->
+                        <div class="tab-pane fade show active" id="sms" role="tabpanel">
+                            <form id="smsOtpForm">
+                                <div class="form-group">
+                                    <label for="phoneNumber">
+                                        <i class="fas fa-phone"></i> Phone Number
+                                    </label>
+                                    <input type="tel" class="form-control" id="phoneNumber" 
+                                           placeholder="+1234567890" required>
+                                    <small class="form-text text-muted">
+                                        Include country code (e.g., +1 for US)
+                                    </small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="smsOtpType">OTP Type</label>
+                                    <select class="form-control" id="smsOtpType">
+                                        <option value="SMS">General Verification</option>
+                                        <option value="LOGIN">Login</option>
+                                        <option value="REGISTRATION">Registration</option>
+                                        <option value="PASSWORD_RESET">Password Reset</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-send-otp btn-block text-white">
+                                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                    <i class="fas fa-paper-plane"></i> Send SMS OTP
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Email Tab -->
+                        <div class="tab-pane fade" id="email" role="tabpanel">
+                            <form id="emailOtpForm">
+                                <div class="form-group">
+                                    <label for="email">
+                                        <i class="fas fa-envelope"></i> Email Address
+                                    </label>
+                                    <input type="email" class="form-control" id="email" 
+                                           placeholder="your@email.com" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="emailOtpType">OTP Type</label>
+                                    <select class="form-control" id="emailOtpType">
+                                        <option value="EMAIL">General Verification</option>
+                                        <option value="LOGIN">Login</option>
+                                        <option value="REGISTRATION">Registration</option>
+                                        <option value="PASSWORD_RESET">Password Reset</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-send-otp btn-block text-white">
+                                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                    <i class="fas fa-paper-plane"></i> Send Email OTP
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="/home" class="text-muted">
+                            <i class="fas fa-arrow-left"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Setup CSRF token for AJAX requests
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+        $(document).ajaxSend(function(e, xhr, options) {
+            xhr.setRequestHeader(header, token);
+        });
+
+        function showAlert(message, type = 'info') {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            `;
+            $('#alertContainer').html(alertHtml);
+        }
+
+        function setLoading(formId, loading) {
+            const form = document.getElementById(formId);
+            const button = form.querySelector('button[type="submit"]');
+            const spinner = button.querySelector('.spinner-border');
+            
+            if (loading) {
+                button.disabled = true;
+                spinner.classList.remove('d-none');
+            } else {
+                button.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        }
+
+        // SMS OTP Form
+        $('#smsOtpForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const phoneNumber = $('#phoneNumber').val().trim();
+            const otpType = $('#smsOtpType').val();
+            
+            console.log('Phone number value:', phoneNumber); // Debug log
+            console.log('Phone field exists:', $('#phoneNumber').length); // Debug log
+            
+            if (!phoneNumber) {
+                showAlert('Please enter a valid phone number', 'warning');
+                return;
+            }
+
+            setLoading('smsOtpForm', true);
+
+            $.post('/otp/send/sms', {
+                phoneNumber: phoneNumber,
+                otpType: otpType
+            }).done(function(response) {
+                if (response.success) {
+                    showAlert(response.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/otp/verify';
+                    }, 2000);
+                } else {
+                    showAlert(response.message, 'danger');
+                }
+            }).fail(function() {
+                showAlert('Error sending OTP. Please try again.', 'danger');
+            }).always(function() {
+                setLoading('smsOtpForm', false);
+            });
+        });
+
+        // Email OTP Form
+        $('#emailOtpForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const email = $('#email').val().trim();
+            const otpType = $('#emailOtpType').val();
+            
+            console.log('Email value:', email); // Debug log
+            console.log('Email field exists:', $('#email').length); // Debug log
+            
+            // Email validation regex
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!email || !emailRegex.test(email)) {
+                showAlert('Please enter a valid email address', 'warning');
+                return;
+            }
+
+            setLoading('emailOtpForm', true);
+
+            $.post('/otp/send/email', {
+                email: email,
+                otpType: otpType
+            }).done(function(response) {
+                if (response.success) {
+                    showAlert(response.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/otp/verify';
+                    }, 2000);
+                } else {
+                    showAlert(response.message, 'danger');
+                }
+            }).fail(function() {
+                showAlert('Error sending OTP. Please try again.', 'danger');
+            }).always(function() {
+                setLoading('emailOtpForm', false);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"args": [
+				"clean",
+				"spring-boot:run"
+			],
+			"command": "mvn",
+			"group": "build",
+			"isBackground": true,
+			"label": "Test Fixed Index Template",
+			"type": "shell"
+		},
+		{
+			"args": [
+				"clean",
+				"spring-boot:run",
+				"-Dspring-boot.run.profiles=admin"
+			],
+			"command": "mvn",
+			"group": "build",
+			"isBackground": true,
+			"label": "Run Admin on Port 8001",
+			"type": "shell"
+		}
+	]
+}

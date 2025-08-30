@@ -1,153 +1,439 @@
-<header xmlns:th="http://www.thymeleaf.org"
-        xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"
-        lang="en">
-    <nav class="navbar navbar-expand-lg re-background navbar-light rounded mb-5">
-        <th:block sec:authorize="isAnonymous()">
-            <a class="navbar-brand brush-script text-white" th:href="@{/}">Online Grocery Store</a>
-        </th:block>
-        <th:block sec:authorize="isAuthenticated()">
-            <a class="navbar-brand brush-script text-white" th:href="@{/home}">Grocery</a>
-        </th:block>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 
-        <div class="collapse navbar-collapse text-white" id="navbarSupportedContent">
+<!-- Header Navigation Fragment -->
+<div th:fragment="header">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <!-- Logo/Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="fas fa-shopping-basket text-success me-2"></i>
+                <span class="fw-bold text-success">FreshMart</span>
+            </a>
 
-            <!--LEFT SIDE-->
-            <ul class="navbar-nav mr-auto">
-                <!--everyone-->
-                <th:block sec:authorize="isAuthenticated()">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white brush-script" href="#" id="navbarDropdownCategories"
-                       role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-list-ul"></i> Categories
-                    </a>
-                    <div class="dropdown-menu bg-re" aria-labelledby="navbarDropdownCategories" id="product-categories">
-                        <a id="allProducts" class="dropdown-item text-white custom-hover categories-dropdown brush-script"
-                           href="/products/category/All"> <i class="fas fa-angle-right"></i> All Products</a>
-                    </div>
-                </li>
-                </th:block>
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <li class="nav-item active">
-                    <a class="nav-link brush-script text-white" th:href="@{/sales}"><i class="fas fa-percent"></i> Sales<span
-                            class="sr-only">(current)</span></a>
-                </li>
-
-                <!--authenticated-->
-                <th:block sec:authorize="isAuthenticated()">
-                    <!--moderator-->
-                    <th:block sec:authorize="hasRole('ROLE_MODERATOR')">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle brush-script text-white" href="#" id="navbarDropdownProducts"
-                               role="button"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-tools"></i> Manage Products
-                            </a>
-                            <div class="dropdown-menu bg-re" aria-labelledby="navbarDropdownProducts">
-                                <a class="dropdown-item text-white custom-hover brush-script categories-dropdown" th:href="@{/products/add}"><i
-                                        class="fas fa-cloud-upload-alt"></i> Add Product</a>
-                                <a class="dropdown-item brush-script text-white custom-hover categories-dropdown" th:href="@{/products/all}">
-                                    <i class="fas fa-list-ul"></i> All Products</a>
-                            </div>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white brush-script" href="#" id="navbarDropdownManageCategories"
-                               role="button"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-tools"></i> Manage Categories
-                            </a>
-                            <div class="dropdown-menu bg-re" aria-labelledby="navbarDropdownProducts">
-                                <a class="dropdown-item text-white custom-hover brush-script categories-dropdown" th:href="@{/categories/add}"><i
-                                        class="fas fa-cloud-upload-alt"></i> Add Category</a>
-                                <a class="dropdown-item text-white custom-hover brush-script categories-dropdown" th:href="@{/categories/all}">
-                                    <i class="fas fa-list-ul"></i> All Categories</a>
-                            </div>
-                        </li>
-                        <li class="nav-item active">
-                            <a class="nav-link text-white" th:href="@{/order/all}"><i class="fas fa-tools"></i> Manage Orders<span
-                                    class="sr-only">(current)</span></a>
-                        </li>
-                        <li class="nav-item active">
-                            <a class="nav-link text-white" th:href="@{/receipts/all}"><i class="fas fa-file-invoice-dollar"></i> Manage Receipts<span
-                                    class="sr-only">(current)</span></a>
-                        </li>
-                    </th:block>
-                </th:block>
-            </ul>
-
-            <!--RIGHT SIDE-->
-            <ul class="navbar-nav float-right pr-5">
-
-                <!--isAnonymous-->
-                <th:block sec:authorize="isAnonymous()">
+            <!-- Navigation Items -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Left Side Navigation -->
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link nav-link-white active text-white" th:href="@{/login}"><i
-                                class="fas fa-sign-in-alt"></i> Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-white active text-white" th:href="@{/register}"><i
-                                class="fas fa-user-plus"></i> Register</a>
-                    </li>
-                </th:block>
-
-                <!--isAuthenticated-->
-                <th:block sec:authorize="isAuthenticated()">
-                    <th:block sec:authorize="hasRole('ROLE_ADMIN')">
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-white active text-white" th:href="@{/admin/users}"><i
-                                    class="fas fa-users-cog"></i> Users List</a>
-                        </li>
-                    </th:block>
-
-
-                        <li class="nav-item active">
-                            <a class="nav-link nav-link-white active text-white" th:href="@{/order/my}"><i class="fas fa-truck"></i> My Orders</a>
-                        </li>
-                    <li class="nav-item active">
-                        <a class="nav-link nav-link-white active text-white" th:href="@{/receipts/my}"><i class="fas fa-file-invoice-dollar"></i> My Receipts</a>
-                    </li>
-                        <li class="nav-item active">
-                            <div class="dropdown">
-                                <a class="nav-link nav-link-white active text-white dropdown-toggle" href="#" role="button" id="cartDropdown"
-                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-cart-arrow-down"></i> Bag
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="cartDropdown">
-                                    <th:block th:each="item : ${#session.getAttribute('shopping-cart')}" th:object="${item}">
-                                        <div class="dropdown-item" th:text="|*{product.product.name} x *{quantity}|"></div>
-                                    </th:block>
-                                    <div class="dropdown-divider"></div>
-                                    <div class="text-center">
-                                        <a th:href="@{/cart/details}" class="btn bg-re dropdown-item text-white custom-hover"><i class="fas fa-cart-arrow-down"></i> Bag</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownProfile" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-user" sec:authorize="hasRole('ROLE_USER')"></i>
-                            <span th:text="${#authentication.getName()}"></span>
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
                         </a>
-
-                        <div class="dropdown-menu bg-re" aria-labelledby="navbarDropdownProfile">
-                            <a class="dropdown-item text-white custom-hover"
-                               th:href="@{/user/profile/{username}(username=${#authentication.getPrincipal().getUsername()})}">
-                                <i class="fas fa-address-card"></i> Profile</a>
-                            <form th:action="@{/logout}" th:method="post">
-                                <button class="dropdown-item text-white custom-hover"><i
-                                        class="fas fa-sign-out-alt"></i> Logout
-                                </button>
-                            </form>
-                        </div>
                     </li>
-                </th:block>
-            </ul>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products">
+                            <i class="fas fa-box me-1"></i>Products
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" href="/products/add">
+                            <i class="fas fa-plus me-1"></i>Add Product
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Right Side Navigation -->
+                <ul class="navbar-nav">
+                    <!-- Cart Icon with Badge -->
+                    <li class="nav-item position-relative" sec:authorize="isAuthenticated()">
+                        <a class="nav-link cart-toggle" href="#" id="cartToggle">
+                            <i class="fas fa-shopping-cart fs-5"></i>
+                            <span class="cart-badge badge bg-success rounded-pill position-absolute top-0 start-100 translate-middle" 
+                                  id="cartBadge" style="display: none;">0</span>
+                        </a>
+                    </li>
+
+                    <!-- User Menu -->
+                    <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                            <span sec:authentication="name">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/profile">
+                                <i class="fas fa-user me-2"></i>Profile
+                            </a></li>
+                            <li><a class="dropdown-item" href="/receipts">
+                                <i class="fas fa-receipt me-2"></i>Orders
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="/users/logout" class="d-inline">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Login/Register for non-authenticated users -->
+                    <li class="nav-item" sec:authorize="!isAuthenticated()">
+                        <a class="nav-link" href="/users/login">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="!isAuthenticated()">
+                        <a class="nav-link" href="/users/register">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
-    <script th:src="@{/js/header.js}"></script>
-</header>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar" sec:authorize="isAuthenticated()">
+        <div class="cart-sidebar-header">
+            <h5><i class="fas fa-shopping-cart me-2"></i>My Cart</h5>
+            <button type="button" class="btn-close cart-close" id="cartClose"></button>
+        </div>
+        
+        <div class="cart-sidebar-body" id="cartSidebarBody">
+            <div class="text-center py-5" id="emptyCartMessage">
+                <i class="fas fa-shopping-cart text-muted" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-3">Your cart is empty</p>
+                <a href="/products" class="btn btn-success btn-sm">Start Shopping</a>
+            </div>
+            
+            <div id="cartItemsList" style="display: none;">
+                <!-- Cart items will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="cart-sidebar-footer" id="cartSidebarFooter" style="display: none;">
+            <div class="cart-total mb-3">
+                <div class="d-flex justify-content-between">
+                    <span>Total Items:</span>
+                    <span id="totalItems">0</span>
+                </div>
+                <div class="d-flex justify-content-between fw-bold">
+                    <span>Total Price:</span>
+                    <span id="totalPrice">₹0.00</span>
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <a href="/cart/details" class="btn btn-success">View Cart</a>
+                <button class="btn btn-outline-danger btn-sm" id="clearCart">Clear Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar Overlay -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+</div>
+
+<!-- Header Styles -->
+<div th:fragment="header-styles">
+    <style>
+        /* Header Navigation Styles */
+        .navbar-brand {
+            font-size: 1.5rem;
+        }
+        
+        .cart-badge {
+            font-size: 0.75rem;
+            min-width: 1.2rem;
+            height: 1.2rem;
+            line-height: 1.2rem;
+        }
+
+        /* Cart Sidebar Styles */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            transition: right 0.3s ease;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.open {
+            right: 0;
+        }
+
+        .cart-sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .cart-sidebar-body {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .cart-sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cart-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .cart-item-price {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .cart-item-quantity button {
+            width: 25px;
+            height: 25px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .cart-item-quantity span {
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .cart-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</div>
+
+<!-- Header JavaScript -->
+<div th:fragment="header-scripts">
+    <script>
+        class CartUI {
+            constructor() {
+                this.cartToggle = document.getElementById('cartToggle');
+                this.cartSidebar = document.getElementById('cartSidebar');
+                this.cartOverlay = document.getElementById('cartOverlay');
+                this.cartClose = document.getElementById('cartClose');
+                this.cartBadge = document.getElementById('cartBadge');
+                
+                this.init();
+                this.loadCart();
+            }
+
+            init() {
+                // Cart toggle events
+                if (this.cartToggle) {
+                    this.cartToggle.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.toggleCart();
+                    });
+                }
+
+                if (this.cartClose) {
+                    this.cartClose.addEventListener('click', () => {
+                        this.closeCart();
+                    });
+                }
+
+                if (this.cartOverlay) {
+                    this.cartOverlay.addEventListener('click', () => {
+                        this.closeCart();
+                    });
+                }
+
+                // Clear cart button
+                const clearCartBtn = document.getElementById('clearCart');
+                if (clearCartBtn) {
+                    clearCartBtn.addEventListener('click', () => {
+                        this.clearCart();
+                    });
+                }
+            }
+
+            toggleCart() {
+                if (this.cartSidebar) {
+                    this.cartSidebar.classList.toggle('open');
+                    this.cartOverlay.classList.toggle('show');
+                    if (this.cartSidebar.classList.contains('open')) {
+                        this.loadCart();
+                    }
+                }
+            }
+
+            closeCart() {
+                if (this.cartSidebar) {
+                    this.cartSidebar.classList.remove('open');
+                    this.cartOverlay.classList.remove('show');
+                }
+            }
+
+            async loadCart() {
+                try {
+                    const response = await fetch('/cart/api/items');
+                    const data = await response.json();
+                    
+                    this.updateCartDisplay(data.items || [], data.summary || {});
+                } catch (error) {
+                    console.error('Error loading cart:', error);
+                }
+            }
+
+            updateCartDisplay(items, summary) {
+                const itemsArray = Array.isArray(items) ? items : Object.values(items);
+                const totalItems = summary.totalItems || 0;
+                const totalPrice = summary.totalPrice || 0;
+
+                // Update badge
+                if (this.cartBadge) {
+                    this.cartBadge.textContent = totalItems;
+                    this.cartBadge.style.display = totalItems > 0 ? 'inline-block' : 'none';
+                }
+
+                // Update sidebar
+                const emptyMessage = document.getElementById('emptyCartMessage');
+                const itemsList = document.getElementById('cartItemsList');
+                const footer = document.getElementById('cartSidebarFooter');
+
+                if (itemsArray.length === 0) {
+                    if (emptyMessage) emptyMessage.style.display = 'block';
+                    if (itemsList) itemsList.style.display = 'none';
+                    if (footer) footer.style.display = 'none';
+                } else {
+                    if (emptyMessage) emptyMessage.style.display = 'none';
+                    if (itemsList) {
+                        itemsList.style.display = 'block';
+                        itemsList.innerHTML = itemsArray.map(item => this.createCartItemHTML(item)).join('');
+                    }
+                    if (footer) {
+                        footer.style.display = 'block';
+                        document.getElementById('totalItems').textContent = totalItems;
+                        document.getElementById('totalPrice').textContent = `₹${totalPrice.toFixed(2)}`;
+                    }
+                }
+            }
+
+            createCartItemHTML(item) {
+                return `
+                    <div class="cart-item">
+                        <img src="${item.imageUrl || '/images/placeholder.jpg'}" alt="${item.name}">
+                        <div class="cart-item-details">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-price">₹${item.price}</div>
+                            <div class="cart-item-quantity">
+                                <button onclick="updateCartQuantity('${item.id}', -1)">-</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="updateCartQuantity('${item.id}', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            async clearCart() {
+                try {
+                    const response = await fetch('/cart/clear', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        this.loadCart();
+                    }
+                } catch (error) {
+                    console.error('Error clearing cart:', error);
+                }
+            }
+        }
+
+        // Global function for updating cart quantity
+        async function updateCartQuantity(productId, change) {
+            try {
+                const url = change > 0 ? '/cart/add-product' : '/cart/remove-product';
+                const method = change > 0 ? 'POST' : 'DELETE';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${productId}&quantity=1`
+                });
+                
+                if (response.ok) {
+                    window.cartUI.loadCart();
+                }
+            } catch (error) {
+                console.error('Error updating cart:', error);
+            }
+        }
+
+        // Initialize cart UI when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            window.cartUI = new CartUI();
+        });
+    </script>
+</div>
+</html>

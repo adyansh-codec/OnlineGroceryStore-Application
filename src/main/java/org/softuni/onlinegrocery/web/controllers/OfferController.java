@@ -55,4 +55,11 @@ public class OfferController extends BaseController {
                 .map(product -> modelMapper.map(product, OfferViewModel.class))
                 .collect(Collectors.toList());
     }
+
+    @GetMapping("/offers")
+    @PageTitle("Special Offers")
+    public ModelAndView offersPage(ModelAndView modelAndView) {
+
+        return view("offer/offers", modelAndView);
+    }
 }
